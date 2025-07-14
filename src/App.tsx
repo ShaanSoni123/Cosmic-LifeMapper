@@ -7,6 +7,8 @@ import { exoplanets } from './data/exoplanets';
 type View = 'dashboard' | 'detail' | 'compare';
 
 function App() {
+  // Add error boundary
+  try {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedExoplanetId, setSelectedExoplanetId] = useState<string | null>(null);
 
@@ -51,6 +53,17 @@ function App() {
       onCompareClick={handleCompareClick}
     />
   );
+  } catch (error) {
+    console.error('App error:', error);
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <h1 className="text-2xl mb-4">Loading Cosmic-LifeMapper...</h1>
+          <p className="text-gray-400">Initializing exoplanet data...</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;
