@@ -97,9 +97,11 @@ export const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
           This cosmic world shows <span className="text-cyan-400 font-semibold">{exoplanet.minerals.water > 20 ? 'abundant' : exoplanet.minerals.water > 10 ? 'moderate' : 'limited'}</span>
           {' '}water presence and <span className="text-purple-400 font-semibold">{exoplanet.minerals.carbon > 10 ? 'significant' : 'minimal'}</span> carbon deposits, 
           {' '}indicating <span className="text-emerald-400 font-semibold">{exoplanet.minerals.water > 15 && exoplanet.minerals.carbon > 8 ? 'promising' : 'challenging'}</span>
-          {' '}conditions for potential life formation and geological stability.
-        </p>
-      </div>
-    </div>
-  );
+                {' '}conditions for potential life formation and geological stability.
+    </p>
+  </div>
+</div>
+);
 };
+
+export default App;
