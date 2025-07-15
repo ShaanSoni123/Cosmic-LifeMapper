@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Exoplanet } from '../types/exoplanet';
 import { exoplanets } from '../data/exoplanets';
-import { ArrowLeft, Globe, Thermometer, Star, Clock } from 'lucide-react';
+import { ArrowLeft, Globe, Thermometer, Star, Clock, Search } from 'lucide-react';
 
 interface ComparisonToolProps {
   onBack: () => void;
