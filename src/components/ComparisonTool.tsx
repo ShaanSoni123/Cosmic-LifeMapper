@@ -9,6 +9,7 @@ interface ComparisonToolProps {
 
 export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
   const [selectedPlanets, setSelectedPlanets] = useState<[Exoplanet | null, Exoplanet | null]>([null, null]);
+  const [searchTerms, setSearchTerms] = useState<[string, string]>(['', '']);
 
   const handlePlanetSelect = (planet: Exoplanet, index: 0 | 1) => {
     const newSelection: [Exoplanet | null, Exoplanet | null] = [...selectedPlanets];
@@ -16,25 +17,65 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
     setSelectedPlanets(newSelection);
   };
 
+  const handleSearchChange = (term: string, index: 0 | 1) => {
+    const newSearchTerms: [string, string] = [...searchTerms];
+    newSearchTerms[index] = term;
+    setSearchTerms(newSearchTerms);
+  };
+
+  const getFilteredPlanets = (index: 0 | 1) => {
+    return exoplanets.filter(p => 
+      p.name.toLowerCase().includes(searchTerms[index].toLowerCase()) &&
+      !selectedPlanets.includes(p)
+    );
+  };
+
   const ComparisonCard: React.FC<{ planet: Exoplanet | null; index: 0 | 1 }> = ({ planet, index }) => {
+    const filteredPlanets = getFilteredPlanets(index);
+    
     if (!planet) {
       return (
         <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 border-dashed hover:border-cyan-400/70 transition-all duration-300 transform hover:scale-105">
           <h3 className="text-xl font-bold text-gray-400 mb-6 text-center">Select Cosmic World {index + 1}</h3>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {exoplanets.map((p) => (
+          
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search exoplanets..."
+              value={searchTerms[index]}
+              onChange={(e) => handleSearchChange(e.target.value, index)}
+              className="w-full pl-10 pr-4 py-3 bg-black/60 border border-cyan-500/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-cyan-400 backdrop-blur-sm transition-all duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          </div>
+          
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {filteredPlanets.length > 0 ? (
+              filteredPlanets.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handlePlanetSelect(p, index)}
+                  className="w-full text-left p-4 rounded-xl backdrop-blur-sm bg-black/40 hover:bg-black/60 transition-all duration-300 text-white border border-cyan-500/20 hover:border-cyan-400/50 transform hover:scale-105"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{p.name}</span>
+                    <span className="text-sm text-gray-400">{p.habitabilityScore}% habitable</span>
+                  </div>
+                </button>
+              ))
+            ) : (
               <button
-                key={p.id}
-                onClick={() => handlePlanetSelect(p, index)}
-                className="w-full text-left p-4 rounded-xl backdrop-blur-sm bg-black/40 hover:bg-black/60 transition-all duration-300 text-white border border-cyan-500/20 hover:border-cyan-400/50 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
-                disabled={selectedPlanets.includes(p)}
+                disabled
+                className="w-full text-left p-4 rounded-xl backdrop-blur-sm bg-black/40 text-gray-500 border border-gray-500/20 cursor-not-allowed"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">{p.name}</span>
-                  <span className="text-sm text-gray-400">{p.habitabilityScore}% habitable</span>
+                  <span className="font-medium">No exoplanets found</span>
+                  <span className="text-sm text-gray-500">Try different search terms</span>
                 </div>
               </button>
-            ))}
+            )}
           </div>
         </div>
       );
