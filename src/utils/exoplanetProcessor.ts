@@ -125,29 +125,47 @@ export function calculateRadiationHazardIndex(
  * Calculate comprehensive habitability score (0-1) - DEBUGGED VERSION
  */
 export function calculateHabitabilityScore(data: RawExoplanetData): number {
+  // Validate input data
+  if (!data || typeof data !== 'object' || data === null) {
+    console.warn('Invalid exoplanet data provided to habitability calculator');
+    return 0;
+  }
+
+  // Ensure all numeric values are valid
+  const safeData = {
+    ...data,
+    star_temperature: Number(data.star_temperature) || 5778,
+    orbital_distance: Number(data.orbital_distance) || 1.0,
+    atmospheric_pressure: Number(data.atmospheric_pressure) || 1.0,
+    stellar_luminosity: Number(data.stellar_luminosity) || 1.0,
+    planet_mass: Number(data.planet_mass) || 1.0,
+    planet_radius: Number(data.planet_radius) || 1.0,
+    host_star_age: Number(data.host_star_age) || 5.0
+  };
+
   // Step 1: Habitable Zone Check
-  const hzBounds = calculateHabitableZoneBounds(data.star_temperature);
-  const inHz = data.orbital_distance >= hzBounds.inner && data.orbital_distance <= hzBounds.outer;
-  const hzFactor = inHz ? 1.0 : Math.max(0.1, 1.0 - Math.abs(data.orbital_distance - (hzBounds.inner + hzBounds.outer) / 2) / hzBounds.outer);
+  const hzBounds = calculateHabitableZoneBounds(safeData.star_temperature);
+  const inHz = safeData.orbital_distance >= hzBounds.inner && safeData.orbital_distance <= hzBounds.outer;
+  const hzFactor = inHz ? 1.0 : Math.max(0.1, 1.0 - Math.abs(safeData.orbital_distance - (hzBounds.inner + hzBounds.outer) / 2) / hzBounds.outer);
 
   // Step 2: Planet Size Factor (Earth-like = 1.0)
-  const radiusFactor = Math.exp(-Math.pow(data.planet_radius - 1.0, 2) / (2 * Math.pow(0.5, 2)));
+  const radiusFactor = Math.exp(-Math.pow(safeData.planet_radius - 1.0, 2) / (2 * Math.pow(0.5, 2)));
   
   // Step 3: Atmospheric Pressure Factor (Earth-like = 1.0)
-  const pressureFactor = Math.exp(-Math.pow(data.atmospheric_pressure - 1.0, 2) / (2 * Math.pow(0.6, 2)));
+  const pressureFactor = Math.exp(-Math.pow(safeData.atmospheric_pressure - 1.0, 2) / (2 * Math.pow(0.6, 2)));
   
   // Step 4: Stellar Luminosity Factor (Sun-like = 1.0)
-  const luminosityFactor = Math.exp(-Math.pow(data.stellar_luminosity - 1.0, 2) / (2 * Math.pow(0.8, 2)));
+  const luminosityFactor = Math.exp(-Math.pow(safeData.stellar_luminosity - 1.0, 2) / (2 * Math.pow(0.8, 2)));
   
   // Step 5: Water Retention Potential
-  const waterPotential = calculateWaterRetentionPotential(data.planet_mass, data.planet_radius, data.star_temperature, data.orbital_distance);
+  const waterPotential = calculateWaterRetentionPotential(safeData.planet_mass, safeData.planet_radius, safeData.star_temperature, safeData.orbital_distance);
   
   // Step 6: Radiation Safety (1 = safe, 0 = dangerous)
-  const radiationSafety = 1 - calculateRadiationHazardIndex(data.star_temperature, data.stellar_luminosity, data.orbital_distance, data.host_star_age);
+  const radiationSafety = 1 - calculateRadiationHazardIndex(safeData.star_temperature, safeData.stellar_luminosity, safeData.orbital_distance, safeData.host_star_age);
   
   // Step 7: Mass Factor (too small = can't hold atmosphere, too large = gas giant)
-  const massFactor = data.planet_mass >= 0.5 && data.planet_mass <= 10 ? 
-    Math.exp(-Math.pow(data.planet_mass - 2.0, 2) / (2 * Math.pow(3.0, 2))) : 0.1;
+  const massFactor = safeData.planet_mass >= 0.5 && safeData.planet_mass <= 10 ? 
+    Math.exp(-Math.pow(safeData.planet_mass - 2.0, 2) / (2 * Math.pow(3.0, 2))) : 0.1;
 
   // Combine all factors with proper weighting
   const scoreRaw = hzFactor * 0.25 +           // 25% - Must be in habitable zone
@@ -165,6 +183,11 @@ export function calculateHabitabilityScore(data: RawExoplanetData): number {
  * Generate realistic mineral composition based on planet characteristics - DEBUGGED
  */
 function generateMinerals(data: RawExoplanetData): Exoplanet['minerals'] {
+  // Validate input data
+  if (!data || typeof data !== 'object') {
+    return { iron: 30, silicon: 25, magnesium: 15, carbon: 10, water: 20 };
+  }
+
   // Base composition for rocky planets
   const planetType = data.planet_radius < 1.5 ? 'rocky' : data.planet_radius < 4 ? 'super-earth' : 'gas-giant';
   
@@ -205,6 +228,11 @@ function generateMinerals(data: RawExoplanetData): Exoplanet['minerals'] {
  * Generate bacterial life potential based on planet characteristics - DEBUGGED
  */
 function generateBacteria(data: RawExoplanetData): Exoplanet['bacteria'] {
+  // Validate input data
+  if (!data || typeof data !== 'object') {
+    return { extremophiles: 50, photosynthetic: 40, chemosynthetic: 60, anaerobic: 70 };
+  }
+
   const surfaceTemp = estimateSurfaceTemperature(data.star_temperature, data.orbital_distance, data.albedo);
   const radiationIndex = calculateRadiationHazardIndex(data.star_temperature, data.stellar_luminosity, data.orbital_distance, data.host_star_age);
   const habitabilityScore = calculateHabitabilityScore(data);
@@ -233,6 +261,11 @@ function generateBacteria(data: RawExoplanetData): Exoplanet['bacteria'] {
  * Generate atmospheric composition based on planet characteristics - DEBUGGED
  */
 function generateAtmosphere(data: RawExoplanetData): Exoplanet['atmosphere'] {
+  // Validate input data
+  if (!data || typeof data !== 'object') {
+    return { nitrogen: 78.0, oxygen: 21.0, carbonDioxide: 0.04, methane: 0.0002 };
+  }
+
   const surfaceTemp = estimateSurfaceTemperature(data.star_temperature, data.orbital_distance, data.albedo);
   const habitabilityScore = calculateHabitabilityScore(data);
   const planetType = data.planet_radius < 1.5 ? 'rocky' : data.planet_radius < 4 ? 'super-earth' : 'gas-giant';
@@ -283,6 +316,12 @@ function getStarType(temperature: number): string {
  * Convert raw exoplanet data to frontend format - DEBUGGED VERSION
  */
 export function convertToExoplanet(data: RawExoplanetData, index: number): Exoplanet {
+  // Validate input data
+  if (!data || typeof data !== 'object') {
+    console.error('Invalid data provided to convertToExoplanet');
+    throw new Error('Invalid exoplanet data');
+  }
+
   // Calculate base habitability score
   const baseHabitabilityScore = calculateHabitabilityScore(data);
   const surfaceTemp = estimateSurfaceTemperature(data.star_temperature, data.orbital_distance, data.albedo);

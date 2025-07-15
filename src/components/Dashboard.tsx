@@ -15,23 +15,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
 
   const filteredExoplanets = exoplanets
     .filter(planet => 
+      planet && 
+      planet.name && 
+      typeof planet.name === 'string' && 
       planet.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (!showOnlyHabitable || planet.habitabilityScore >= 70) // Only show planets with 70%+ habitability
     )
     .sort((a, b) => {
+      if (!a || !b) return 0;
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
         case 'habitability':
-          return b.habitabilityScore - a.habitabilityScore;
+          return (Number(b.habitabilityScore) || 0) - (Number(a.habitabilityScore) || 0);
         case 'distance':
-          return a.distance - b.distance;
+          return (Number(a.distance) || 0) - (Number(b.distance) || 0);
         default:
           return 0;
       }
     });
 
-  const habitablePlanetsCount = exoplanets.filter(p => p.habitabilityScore >= 70).length;
+  const habitablePlanetsCount = exoplanets.filter(p => p && typeof p.habitabilityScore === 'number' && p.habitabilityScore >= 70).length;
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">

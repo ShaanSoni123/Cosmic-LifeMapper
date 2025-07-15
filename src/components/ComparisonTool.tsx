@@ -25,6 +25,9 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
 
   const getFilteredPlanets = (index: 0 | 1) => {
     return exoplanets.filter(p => 
+      p && 
+      p.name && 
+      typeof p.name === 'string' && 
       p.name.toLowerCase().includes(searchTerms[index].toLowerCase()) &&
       !selectedPlanets.includes(p)
     );
@@ -36,6 +39,12 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
     if (!planet) {
       return (
         <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 border-dashed hover:border-cyan-400/70 transition-all duration-300 transform hover:scale-105">
+          {/* Validate planet data */}
+          {!planet && (
+            <div className="text-center text-gray-400 mb-4">
+              <p>No planet selected</p>
+            </div>
+          )}
           <h3 className="text-xl font-bold text-gray-400 mb-6 text-center">Select Cosmic World {index + 1}</h3>
           
           {/* Search Bar */}
@@ -60,7 +69,7 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
                   className="w-full text-left p-4 rounded-xl backdrop-blur-sm bg-black/40 hover:bg-black/60 transition-all duration-300 text-white border border-cyan-500/20 hover:border-cyan-400/50 transform hover:scale-105"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{p.name}</span>
+                    <span className="font-medium">{p.name || 'Unknown Planet'}</span>
                     <span className="text-sm text-gray-400">{p.habitabilityScore}% habitable</span>
                   </div>
                 </button>
@@ -81,10 +90,20 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
       );
     }
 
+    // Validate planet data before rendering
+    if (!planet || typeof planet !== 'object') {
+      return (
+        <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-red-500/30">
+          <h3 className="text-xl font-bold text-red-400 mb-6 text-center">Invalid Planet Data</h3>
+          <p className="text-gray-400 text-center">Please select a different planet.</p>
+        </div>
+      );
+    }
+
     return (
       <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">{planet.name}</h3>
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">{planet.name || 'Unknown Planet'}</h3>
           <button
             onClick={() => handlePlanetSelect(null as any, index)}
             className="text-gray-400 hover:text-cyan-400 transition-colors duration-300 px-3 py-1 rounded-lg hover:bg-black/30"
@@ -98,22 +117,22 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
             <div className="text-center p-4 backdrop-blur-sm bg-black/40 rounded-xl border border-blue-500/30 transform hover:scale-105 transition-all duration-300">
               <Globe className="w-8 h-8 text-blue-400 mx-auto mb-3 animate-pulse" />
               <p className="text-xs text-gray-400 mb-1">Distance</p>
-              <p className="text-lg font-bold text-white">{planet.distance} ly</p>
+              <p className="text-lg font-bold text-white">{Number(planet.distance) || 0} ly</p>
             </div>
             <div className="text-center p-4 backdrop-blur-sm bg-black/40 rounded-xl border border-red-500/30 transform hover:scale-105 transition-all duration-300">
               <Thermometer className="w-8 h-8 text-red-400 mx-auto mb-3 animate-pulse" />
               <p className="text-xs text-gray-400 mb-1">Temperature</p>
-              <p className="text-lg font-bold text-white">{planet.temperature}K</p>
+              <p className="text-lg font-bold text-white">{Number(planet.temperature) || 0}K</p>
             </div>
             <div className="text-center p-4 backdrop-blur-sm bg-black/40 rounded-xl border border-yellow-500/30 transform hover:scale-105 transition-all duration-300">
               <Star className="w-8 h-8 text-yellow-400 mx-auto mb-3 animate-pulse" />
               <p className="text-xs text-gray-400 mb-1">Mass</p>
-              <p className="text-lg font-bold text-white">{planet.mass}M⊕</p>
+              <p className="text-lg font-bold text-white">{Number(planet.mass) || 0}M⊕</p>
             </div>
             <div className="text-center p-4 backdrop-blur-sm bg-black/40 rounded-xl border border-green-500/30 transform hover:scale-105 transition-all duration-300">
               <Clock className="w-8 h-8 text-green-400 mx-auto mb-3 animate-pulse" />
               <p className="text-xs text-gray-400 mb-1">Orbit</p>
-              <p className="text-lg font-bold text-white">{planet.orbitalPeriod}d</p>
+              <p className="text-lg font-bold text-white">{Number(planet.orbitalPeriod) || 0}d</p>
             </div>
           </div>
 
@@ -123,16 +142,16 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
               <div className="flex-1 bg-black/60 rounded-full h-4 overflow-hidden border border-gray-700/30">
                 <div
                   className={`h-4 rounded-full shadow-lg transition-all duration-1000 ${
-                    planet.habitabilityScore >= 80
+                    (Number(planet.habitabilityScore) || 0) >= 80
                       ? 'bg-gradient-to-r from-emerald-400 via-green-400 to-cyan-500'
-                      : planet.habitabilityScore >= 60
+                      : (Number(planet.habitabilityScore) || 0) >= 60
                       ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400'
                       : 'bg-gradient-to-r from-red-500 via-pink-500 to-purple-500'
                   }`}
-                  style={{ width: `${planet.habitabilityScore}%` }}
+                  style={{ width: `${Number(planet.habitabilityScore) || 0}%` }}
                 ></div>
               </div>
-              <span className="text-lg font-bold text-white">{planet.habitabilityScore}%</span>
+              <span className="text-lg font-bold text-white">{Number(planet.habitabilityScore) || 0}%</span>
             </div>
           </div>
 
@@ -141,19 +160,19 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex justify-between p-2 bg-black/40 rounded-lg border border-cyan-500/20">
                 <span className="text-gray-300">Water:</span>
-                <span className="text-cyan-400 font-bold">{planet.minerals.water}%</span>
+                <span className="text-cyan-400 font-bold">{Number(planet.minerals?.water) || 0}%</span>
               </div>
               <div className="flex justify-between p-2 bg-black/40 rounded-lg border border-orange-500/20">
                 <span className="text-gray-300">Iron:</span>
-                <span className="text-orange-400 font-bold">{planet.minerals.iron}%</span>
+                <span className="text-orange-400 font-bold">{Number(planet.minerals?.iron) || 0}%</span>
               </div>
               <div className="flex justify-between p-2 bg-black/40 rounded-lg border border-purple-500/20">
                 <span className="text-gray-300">Carbon:</span>
-                <span className="text-purple-400 font-bold">{planet.minerals.carbon}%</span>
+                <span className="text-purple-400 font-bold">{Number(planet.minerals?.carbon) || 0}%</span>
               </div>
               <div className="flex justify-between p-2 bg-black/40 rounded-lg border border-gray-500/20">
                 <span className="text-gray-300">Silicon:</span>
-                <span className="text-gray-400 font-bold">{planet.minerals.silicon}%</span>
+                <span className="text-gray-400 font-bold">{Number(planet.minerals?.silicon) || 0}%</span>
               </div>
             </div>
           </div>
@@ -252,34 +271,34 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
                 <div className="text-center p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-emerald-500/30 transform hover:scale-105 transition-all duration-300">
                   <h4 className="text-lg font-semibold text-white mb-3">More Habitable</h4>
                   <p className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
-                    {selectedPlanets[0].habitabilityScore > selectedPlanets[1].habitabilityScore
-                      ? selectedPlanets[0].name
-                      : selectedPlanets[1].name}
+                    {(Number(selectedPlanets[0]?.habitabilityScore) || 0) > (Number(selectedPlanets[1]?.habitabilityScore) || 0)
+                      ? selectedPlanets[0]?.name || 'Unknown'
+                      : selectedPlanets[1]?.name || 'Unknown'}
                   </p>
                   <p className="text-sm text-gray-400 mt-2">
-                    {Math.max(selectedPlanets[0].habitabilityScore, selectedPlanets[1].habitabilityScore)}% habitability
+                    {Math.max(Number(selectedPlanets[0]?.habitabilityScore) || 0, Number(selectedPlanets[1]?.habitabilityScore) || 0)}% habitability
                   </p>
                 </div>
                 <div className="text-center p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-blue-500/30 transform hover:scale-105 transition-all duration-300">
                   <h4 className="text-lg font-semibold text-white mb-3">Closer to Earth</h4>
                   <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    {selectedPlanets[0].distance < selectedPlanets[1].distance
-                      ? selectedPlanets[0].name
-                      : selectedPlanets[1].name}
+                    {(Number(selectedPlanets[0]?.distance) || 0) < (Number(selectedPlanets[1]?.distance) || 0)
+                      ? selectedPlanets[0]?.name || 'Unknown'
+                      : selectedPlanets[1]?.name || 'Unknown'}
                   </p>
                   <p className="text-sm text-gray-400 mt-2">
-                    {Math.min(selectedPlanets[0].distance, selectedPlanets[1].distance)} light years
+                    {Math.min(Number(selectedPlanets[0]?.distance) || 0, Number(selectedPlanets[1]?.distance) || 0)} light years
                   </p>
                 </div>
                 <div className="text-center p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-cyan-500/30 transform hover:scale-105 transition-all duration-300">
                   <h4 className="text-lg font-semibold text-white mb-3">More Water</h4>
                   <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                    {selectedPlanets[0].minerals.water > selectedPlanets[1].minerals.water
-                      ? selectedPlanets[0].name
-                      : selectedPlanets[1].name}
+                    {(Number(selectedPlanets[0]?.minerals?.water) || 0) > (Number(selectedPlanets[1]?.minerals?.water) || 0)
+                      ? selectedPlanets[0]?.name || 'Unknown'
+                      : selectedPlanets[1]?.name || 'Unknown'}
                   </p>
                   <p className="text-sm text-gray-400 mt-2">
-                    {Math.max(selectedPlanets[0].minerals.water, selectedPlanets[1].minerals.water)}% water content
+                    {Math.max(Number(selectedPlanets[0]?.minerals?.water) || 0, Number(selectedPlanets[1]?.minerals?.water) || 0)}% water content
                   </p>
                 </div>
               </div>

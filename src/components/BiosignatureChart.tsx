@@ -9,14 +9,15 @@ interface BiosignatureChartProps {
 export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet }) => {
   const biosignature = exoplanet.biosignature;
   
-  if (!biosignature) {
+  if (!biosignature || !exoplanet || typeof biosignature !== 'object') {
+    console.warn('Invalid biosignature data provided to BiosignatureChart');
     return null;
   }
 
   const chemicalData = [
     {
       name: 'Oxygen (O₂)',
-      value: biosignature.chemicalAnalysis.O2 || 0,
+      value: Number(biosignature.chemicalAnalysis?.O2) || 0,
       icon: Activity,
       color: 'from-green-400 via-emerald-500 to-teal-500',
       bgColor: 'from-green-900/40 to-emerald-900/40',
@@ -24,7 +25,7 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
     },
     {
       name: 'Nitrogen (N₂)',
-      value: biosignature.chemicalAnalysis.N2 || 0,
+      value: Number(biosignature.chemicalAnalysis?.N2) || 0,
       icon: Atom,
       color: 'from-blue-400 via-cyan-500 to-sky-500',
       bgColor: 'from-blue-900/40 to-cyan-900/40',
@@ -32,7 +33,7 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
     },
     {
       name: 'Carbon Dioxide (CO₂)',
-      value: biosignature.chemicalAnalysis.CO2 || 0,
+      value: Number(biosignature.chemicalAnalysis?.CO2) || 0,
       icon: Beaker,
       color: 'from-orange-400 via-red-500 to-pink-500',
       bgColor: 'from-orange-900/40 to-red-900/40',
@@ -40,7 +41,7 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
     },
     {
       name: 'Temperature',
-      value: biosignature.chemicalAnalysis.Temperature || 0,
+      value: Number(biosignature.chemicalAnalysis?.Temperature) || 0,
       icon: Thermometer,
       color: 'from-purple-400 via-violet-500 to-indigo-500',
       bgColor: 'from-purple-900/40 to-indigo-900/40',
@@ -49,6 +50,7 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
   ];
 
   const getScoreColor = (score: number) => {
+    if (typeof score !== 'number' || isNaN(score)) score = 0;
     if (score >= 80) return 'from-emerald-400 via-green-400 to-cyan-400';
     if (score >= 60) return 'from-yellow-400 via-orange-400 to-red-400';
     return 'from-red-500 via-pink-500 to-purple-500';
@@ -99,20 +101,20 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
             <span>Biosignature Score</span>
           </h4>
           <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            {Math.round(biosignature.score)}%
+            {Math.round(Number(biosignature.score) || 0)}%
           </span>
         </div>
         <div className="relative mb-4">
           <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden border border-gray-700/30">
             <div 
-              className={`h-3 rounded-full shadow-lg transition-all duration-1000 ease-out bg-gradient-to-r ${getScoreColor(biosignature.score)}`}
-              style={{ width: `${biosignature.score}%` }}
+              className={`h-3 rounded-full shadow-lg transition-all duration-1000 ease-out bg-gradient-to-r ${getScoreColor(Number(biosignature.score) || 0)}`}
+              style={{ width: `${Number(biosignature.score) || 0}%` }}
             ></div>
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-pulse"></div>
         </div>
         <p className="text-sm text-gray-300 leading-relaxed mb-3">
-          <span className="text-cyan-400 font-semibold">{biosignature.classification}</span>
+          <span className="text-cyan-400 font-semibold">{biosignature.classification || 'Unknown Classification'}</span>
         </p>
         <p className="text-xs text-gray-400 leading-relaxed">
           This analysis evaluates atmospheric chemical composition and temperature conditions to assess the potential for life-supporting biosignatures. 

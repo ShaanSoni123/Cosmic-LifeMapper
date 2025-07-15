@@ -93,7 +93,16 @@ const CHEMICAL_SURVIVAL_DATA = {
  * Get survival percentage for a chemical based on its concentration
  */
 function getSurvivalValue(chemical: keyof typeof CHEMICAL_SURVIVAL_DATA, concentration: number): number {
+  // Validate inputs
+  if (typeof concentration !== 'number' || isNaN(concentration) || concentration < 0) {
+    return 0;
+  }
+
   const survivalData = CHEMICAL_SURVIVAL_DATA[chemical];
+  
+  if (!survivalData) {
+    return 0;
+  }
   
   for (const entry of survivalData) {
     const [low, high] = entry.range;
@@ -109,6 +118,11 @@ function getSurvivalValue(chemical: keyof typeof CHEMICAL_SURVIVAL_DATA, concent
  * Calculate temperature survival score
  */
 function getTemperatureSurvival(tempCelsius: number): number {
+  // Validate temperature input
+  if (typeof tempCelsius !== 'number' || isNaN(tempCelsius)) {
+    return 10; // Default low survival for invalid temperature
+  }
+
   // Optimal temperature range for life (0-40°C gets 100%, outside gets reduced score)
   if (tempCelsius >= 0 && tempCelsius <= 40) {
     return 100;
@@ -132,6 +146,15 @@ export function generateBiosignatureReport(
   chemicalConcentrations: ChemicalConcentration,
   temperatureCelsius: number
 ): BiosignatureReport {
+  // Validate inputs
+  if (!chemicalConcentrations || typeof chemicalConcentrations !== 'object') {
+    console.warn('Invalid chemical concentrations provided to biosignature analyzer');
+    return {
+      Temperature: 10,
+      HabitabilityScore: 10
+    };
+  }
+
   const report: Partial<BiosignatureReport> = {};
   let totalScore = 0;
   let componentCount = 0;
@@ -192,6 +215,17 @@ export function calculateEnhancedHabitabilityScore(
   biosignatureScore: number,
   weight: number = 0.3
 ): number {
+  // Validate inputs
+  if (typeof traditionalScore !== 'number' || isNaN(traditionalScore)) {
+    traditionalScore = 0;
+  }
+  if (typeof biosignatureScore !== 'number' || isNaN(biosignatureScore)) {
+    biosignatureScore = 0;
+  }
+  if (typeof weight !== 'number' || isNaN(weight) || weight < 0 || weight > 1) {
+    weight = 0.3;
+  }
+
   // Ensure scores are in valid range
   const validTraditional = Math.max(0, Math.min(100, traditionalScore));
   const validBiosignature = Math.max(0, Math.min(100, biosignatureScore));
