@@ -25,7 +25,7 @@ export interface FuzzyMatch {
 }
 
 class NASAExoplanetService {
-  private baseUrl = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync';
+  private baseUrl = '/server/nasa-proxy.php';
   private headers = {
     'User-Agent': 'Mozilla/5.0 (Cosmic-LifeMapper/1.0)',
     'Content-Type': 'application/x-www-form-urlencoded'
