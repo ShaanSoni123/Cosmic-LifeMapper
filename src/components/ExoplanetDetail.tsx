@@ -6,6 +6,7 @@ import { MineralsChart } from './MineralsChart';
 import { BacteriaChart } from './BacteriaChart';
 import { BiosignatureChart } from './BiosignatureChart';
 import { ScientificAnalysis } from './ScientificAnalysis';
+import { AtmosphericAnalysis } from './AtmosphericAnalysis';
 
 interface ExoplanetDetailProps {
   exoplanet: Exoplanet;
@@ -147,61 +148,8 @@ export const ExoplanetDetail: React.FC<ExoplanetDetailProps> = ({ exoplanet, onB
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 mb-8">
-            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-purple-500/30 shadow-2xl shadow-purple-500/20 transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
-              <h3 className="text-2xl font-bold text-white mb-8 flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
-                <span>Atmospheric Composition</span>
-              </h3>
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 font-medium">Nitrogen</span>
-                    <span className="text-white font-bold">{exoplanet.atmosphere.nitrogen}%</span>
-                  </div>
-                  <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden border border-blue-500/30">
-                    <div
-                      className="h-3 rounded-full bg-gradient-to-r from-blue-400 to-cyan-500 shadow-lg"
-                      style={{ width: `${exoplanet.atmosphere.nitrogen}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 font-medium">Oxygen</span>
-                    <span className="text-white font-bold">{exoplanet.atmosphere.oxygen}%</span>
-                  </div>
-                  <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden border border-green-500/30">
-                    <div
-                      className="h-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 shadow-lg"
-                      style={{ width: `${exoplanet.atmosphere.oxygen * 4}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 font-medium">Carbon Dioxide</span>
-                    <span className="text-white font-bold">{exoplanet.atmosphere.carbonDioxide}%</span>
-                  </div>
-                  <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden border border-orange-500/30">
-                    <div
-                      className="h-3 rounded-full bg-gradient-to-r from-orange-400 to-red-500 shadow-lg"
-                      style={{ width: `${exoplanet.atmosphere.carbonDioxide * 5}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300 font-medium">Methane</span>
-                    <span className="text-white font-bold">{exoplanet.atmosphere.methane}%</span>
-                  </div>
-                  <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden border border-purple-500/30">
-                    <div
-                      className="h-3 rounded-full bg-gradient-to-r from-purple-400 to-violet-500 shadow-lg"
-                      style={{ width: `${Math.min(100, exoplanet.atmosphere.methane * 50)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
+            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+              <AtmosphericAnalysis exoplanet={exoplanet} />
             </div>
             <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
               <MineralsChart exoplanet={exoplanet} />
