@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: text/csv');
+header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -15,7 +15,7 @@ $format = $_POST['format'] ?? 'csv';
 
 if (empty($query)) {
     http_response_code(400);
-    echo 'Error: Query parameter is required.';
+    echo json_encode(['error' => 'Query parameter is required.']);
     exit();
 }
 
@@ -38,8 +38,22 @@ $result = @file_get_contents($nasaApiUrl, false, $context);
 
 if ($result === FALSE) {
     http_response_code(500);
-    echo 'Error: Could not connect to NASA Exoplanet Archive or retrieve data.';
-} else {
+    echo json_encode(['error' => 'Could not connect to NASA Exoplanet Archive']);
+    exit();
+}
+
+// Check if the response contains an error
+if (strpos($result, 'ERROR') !== false || strpos($result, 'Exception') !== false) {
+    http_response_code(400);
+    echo json_encode(['error' => 'NASA API returned an error: ' . substr($result, 0, 200)]);
+    exit();
+}
+
+// For CSV format, return as plain text
+if ($format === 'csv') {
+    header('Content-Type: text/csv');
     echo $result;
+} else {
+    echo json_encode(['data' => $result]);
 }
 ?>

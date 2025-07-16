@@ -35,7 +35,7 @@ class NASAExoplanetService {
    * Load all planet names from NASA Exoplanet Archive (lightweight query)
    */
   async loadPlanetNames(): Promise<string[]> {
-    const query = 'SELECT pl_name FROM pscomppars';
+    const query = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL ORDER BY pl_name';
     const params = new URLSearchParams({
       query,
       format: 'csv'
@@ -49,16 +49,30 @@ class NASAExoplanetService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('NASA API Error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
       const csvText = await response.text();
+      
+      // Check if response contains error messages
+      if (csvText.includes('ERROR') || csvText.includes('Exception') || csvText.includes('<?php')) {
+        console.error('Invalid NASA API response:', csvText.substring(0, 200));
+        throw new Error('Invalid response from NASA API');
+      }
+      
       const lines = csvText.trim().split('\n');
+      
+      if (lines.length < 2) {
+        console.warn('No planet data received from NASA');
+        return [];
+      }
       
       // Skip header row and extract planet names
       const planetNames = lines.slice(1)
         .map(line => line.trim())
-        .filter(line => line && line !== 'null')
+        .filter(line => line && line !== 'null' && line !== '' && !line.includes('<?php'))
         .sort();
 
       console.log(`✨ Loaded ${planetNames.length} exoplanet names from NASA Archive`);
@@ -80,7 +94,7 @@ class NASAExoplanetService {
       SELECT pl_name, pl_rade, pl_bmasse, pl_orbper, pl_eqt, 
              st_teff, st_age, st_mass, st_dens, disc_year, 
              pl_nespec, discoverymethod, disc_locale, disc_facility, st_rad 
-      FROM pscomppars 
+      FROM ps 
       WHERE pl_name = '${safeName}'
     `;
 
@@ -97,10 +111,19 @@ class NASAExoplanetService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('NASA API Error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
       const csvText = await response.text();
+      
+      // Check if response contains error messages
+      if (csvText.includes('ERROR') || csvText.includes('Exception') || csvText.includes('<?php')) {
+        console.error('Invalid NASA API response:', csvText.substring(0, 200));
+        return null;
+      }
+      
       const lines = csvText.trim().split('\n');
 
       if (lines.length < 2) {
