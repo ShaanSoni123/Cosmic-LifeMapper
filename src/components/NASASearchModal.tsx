@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Satellite, Globe, Calendar, Zap, Loader } from 'lucide-react';
+import { Search, X, Satellite, Globe, Calendar, Zap, Loader, Book, Info } from 'lucide-react';
 import { nasaExoplanetService, FuzzyMatch, NASAExoplanetData } from '../services/nasaExoplanetService';
+import { NASAParameterGuide } from './NASAParameterGuide';
+import { formatParameterValue, getParameterDefinition } from '../utils/nasaParameterDefinitions';
 
 interface NASASearchModalProps {
   isOpen: boolean;
@@ -16,6 +18,7 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingNames, setIsLoadingNames] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showParameterGuide, setShowParameterGuide] = useState(false);
 
   // Load planet names when modal opens
   useEffect(() => {
@@ -111,12 +114,22 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-white transition-colors duration-300 p-2 hover:bg-white/10 rounded-lg"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowParameterGuide(true)}
+              className="flex items-center space-x-2 text-gray-400 hover:text-cyan-400 transition-colors duration-300 p-2 hover:bg-white/10 rounded-lg"
+              title="Parameter Guide"
+            >
+              <Book className="w-5 h-5" />
+              <span className="text-sm">Guide</span>
+            </button>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-white transition-colors duration-300 p-2 hover:bg-white/10 rounded-lg"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
         <div className="flex h-[600px]">
@@ -216,30 +229,45 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
                   <div className="space-y-4">
                     {/* Physical Properties */}
                     <div className="backdrop-blur-sm bg-black/40 rounded-xl p-4 border border-gray-700/30">
-                      <h4 className="text-white font-semibold mb-3">Physical Properties</h4>
+                      <h4 className="text-white font-semibold mb-3 flex items-center space-x-2">
+                        <Globe className="w-4 h-4 text-cyan-400" />
+                        <span>Physical Properties</span>
+                      </h4>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         {selectedPlanet.pl_rade && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Radius:</span>
-                            <span className="text-white">{selectedPlanet.pl_rade.toFixed(2)} R⊕</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Radius (pl_rade):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('pl_rade', selectedPlanet.pl_rade)}</span>
                           </div>
                         )}
                         {selectedPlanet.pl_bmasse && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Mass:</span>
-                            <span className="text-white">{selectedPlanet.pl_bmasse.toFixed(2)} M⊕</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Mass (pl_bmasse):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('pl_bmasse', selectedPlanet.pl_bmasse)}</span>
                           </div>
                         )}
                         {selectedPlanet.pl_eqt && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Temperature:</span>
-                            <span className="text-white">{Math.round(selectedPlanet.pl_eqt)} K</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Temperature (pl_eqt):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('pl_eqt', selectedPlanet.pl_eqt)}</span>
                           </div>
                         )}
                         {selectedPlanet.pl_orbper && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Orbital Period:</span>
-                            <span className="text-white">{selectedPlanet.pl_orbper.toFixed(1)} days</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Orbital Period (pl_orbper):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('pl_orbper', selectedPlanet.pl_orbper)}</span>
                           </div>
                         )}
                       </div>
@@ -247,30 +275,45 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
 
                     {/* Stellar Properties */}
                     <div className="backdrop-blur-sm bg-black/40 rounded-xl p-4 border border-gray-700/30">
-                      <h4 className="text-white font-semibold mb-3">Host Star</h4>
+                      <h4 className="text-white font-semibold mb-3 flex items-center space-x-2">
+                        <Star className="w-4 h-4 text-yellow-400" />
+                        <span>Host Star</span>
+                      </h4>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         {selectedPlanet.st_teff && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Temperature:</span>
-                            <span className="text-white">{Math.round(selectedPlanet.st_teff)} K</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Temperature (st_teff):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('st_teff', selectedPlanet.st_teff)}</span>
                           </div>
                         )}
                         {selectedPlanet.st_mass && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Mass:</span>
-                            <span className="text-white">{selectedPlanet.st_mass.toFixed(2)} M☉</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Mass (st_mass):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('st_mass', selectedPlanet.st_mass)}</span>
                           </div>
                         )}
                         {selectedPlanet.st_rad && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Radius:</span>
-                            <span className="text-white">{selectedPlanet.st_rad.toFixed(2)} R☉</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Radius (st_rad):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('st_rad', selectedPlanet.st_rad)}</span>
                           </div>
                         )}
                         {selectedPlanet.st_age && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Age:</span>
-                            <span className="text-white">{selectedPlanet.st_age.toFixed(1)} Gyr</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Age (st_age):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('st_age', selectedPlanet.st_age)}</span>
                           </div>
                         )}
                       </div>
@@ -285,19 +328,28 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
                       <div className="space-y-2 text-sm">
                         {selectedPlanet.disc_year && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Year:</span>
-                            <span className="text-white">{selectedPlanet.disc_year}</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Year (disc_year):</span>
+                            </span>
+                            <span className="text-white">{formatParameterValue('disc_year', selectedPlanet.disc_year)}</span>
                           </div>
                         )}
                         {selectedPlanet.discoverymethod && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Method:</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Method:</span>
+                            </span>
                             <span className="text-white text-xs">{selectedPlanet.discoverymethod}</span>
                           </div>
                         )}
                         {selectedPlanet.disc_facility && (
                           <div className="flex justify-between">
-                            <span className="text-gray-400">Facility:</span>
+                            <span className="text-gray-400 flex items-center space-x-1">
+                              <Info className="w-3 h-3" />
+                              <span>Facility:</span>
+                            </span>
                             <span className="text-white text-xs">{selectedPlanet.disc_facility}</span>
                           </div>
                         )}
@@ -331,6 +383,12 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
           </div>
         </div>
       </div>
+
+      {/* Parameter Guide Modal */}
+      <NASAParameterGuide
+        isOpen={showParameterGuide}
+        onClose={() => setShowParameterGuide(false)}
+      />
     </div>
   );
 };

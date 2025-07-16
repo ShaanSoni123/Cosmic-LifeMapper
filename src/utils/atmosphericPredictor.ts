@@ -248,15 +248,15 @@ export const atmosphericPredictor = new AtmosphericPredictor();
  * Convert exoplanet data to atmospheric input format with proper units
  */
 export function convertToAtmosphericInput(exoplanet: any): AtmosphericInput {
-  // Convert from frontend units to atmospheric predictor units
+  // Convert from frontend units to NASA parameter units (matching param_uni.txt)
   return {
-    pl_dens: (exoplanet.mass * 5.97e24) / ((4/3) * Math.PI * Math.pow(exoplanet.radius * 6.371e6, 3)) / 1000, // g/cm³
-    pl_orbper: exoplanet.orbitalPeriod, // days
-    pl_eqtstr: exoplanet.temperature, // K
-    st_rad: 1.0, // Solar radii (estimated)
-    st_lum: exoplanet.starType === 'M-dwarf' ? 0.1 : exoplanet.starType === 'K-type' ? 0.5 : 1.0, // Solar units
-    pl_bmassj: exoplanet.mass / 317.8, // Jupiter masses
-    pl_ratror: exoplanet.radius / 109.2, // Planet-to-star radius ratio (estimated)
-    st_met: 0.0 // Solar metallicity (estimated)
+    pl_dens: (exoplanet.mass * 5.97e24) / ((4/3) * Math.PI * Math.pow(exoplanet.radius * 6.371e6, 3)) / 1000, // Planet Density (g/cm³) - matches param_uni.txt
+    pl_orbper: exoplanet.orbitalPeriod, // Orbital Period (days) - matches param_uni.txt
+    pl_eqtstr: exoplanet.temperature, // Equilibrium Temperature (K) - matches param_uni.txt
+    st_rad: 1.0, // Stellar Radius (Solar Radii) - matches param_uni.txt
+    st_lum: exoplanet.starType === 'M-dwarf' ? 0.1 : exoplanet.starType === 'K-type' ? 0.5 : 1.0, // Stellar Luminosity (Solar Units) - matches param_uni.txt
+    pl_bmassj: exoplanet.mass / 317.8, // Planet Mass (Jupiter Masses) - matches param_uni.txt
+    pl_ratror: exoplanet.radius / 109.2, // Ratio of Planet to Stellar Radius - matches param_uni.txt
+    st_met: 0.0 // Stellar Metallicity [Fe/H] - matches param_uni.txt
   };
 }
