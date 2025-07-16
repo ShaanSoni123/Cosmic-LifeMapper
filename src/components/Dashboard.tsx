@@ -136,8 +136,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </h1>
             </div>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
-              Journey through the infinite cosmos to discover {totalCount} scientifically analyzed exoplanets. 
-              Explore their mysterious compositions, analyze their life potential, and compare their unique cosmic signatures.
+              Embark on a voyage across the cosmos to uncover a universe of scientifically explored exoplanets. 
+              Dive into their enigmatic compositions, evaluate their potential to host life, and compare the distinct celestial imprints they leave behind.
               {dynamicExoplanets.length > 0 && (
                 <span className="block mt-2 text-purple-300 font-medium">
                   Including {dynamicExoplanets.length} real exoplanets from NASA's archive!
