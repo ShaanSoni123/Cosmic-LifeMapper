@@ -148,73 +148,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
 
           {/* Floating Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
+          <div className="mb-12">
+            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 max-w-2xl mx-auto">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
-                  <span className="text-white font-bold text-lg">{totalCount}</span>
+                  <span className="text-white font-bold text-lg">4419</span>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-white mb-1">{totalCount}</h3>
+                  <h3 className="text-3xl font-bold text-white mb-1">4419</h3>
                   <p className="text-cyan-300 font-medium">Worlds Discovered</p>
                 </div>
-              </div>
-            </div>
-            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center animate-pulse">
-                  <span className="text-white font-bold text-lg">{habitablePlanetsCount}</span>
-                </div>
-                <div>
-                  <h3 className="text-3xl font-bold text-white mb-1">{habitablePlanetsCount}</h3>
-                  <p className="text-emerald-300 font-medium">Life Candidates</p>
-                </div>
-              </div>
-              <div className="mt-3 text-center">
-                <p className="text-xs text-emerald-400">
-                  {Math.round((habitablePlanetsCount / totalCount) * 100)}% of discovered worlds
-                </p>
-              </div>
-            </div>
-            {/* Habitable Exoplanets Interactive Card */}
-            <div 
-              onClick={() => setShowOnlyHabitable(!showOnlyHabitable)}
-              className={`backdrop-blur-xl bg-black/40 rounded-3xl p-8 border shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 cursor-pointer ${
-                showOnlyHabitable 
-                  ? 'border-emerald-500/50 shadow-emerald-500/40 hover:shadow-emerald-500/60' 
-                  : 'border-purple-500/30 shadow-purple-500/20 hover:shadow-purple-500/40'
-              }`}
-            >
-              <div className="flex items-center space-x-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center animate-pulse ${
-                  showOnlyHabitable 
-                    ? 'bg-gradient-to-r from-emerald-500 to-green-500' 
-                    : 'bg-gradient-to-r from-purple-500 to-violet-500'
-                }`}>
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className={`text-3xl font-bold mb-1 ${
-                    showOnlyHabitable ? 'text-emerald-400' : 'text-white'
-                  }`}>
-                    {showOnlyHabitable ? 'ON' : 'OFF'}
-                  </h3>
-                  <p className={`font-medium ${
-                    showOnlyHabitable ? 'text-emerald-300' : 'text-purple-300'
-                  }`}>
-                    Habitable Exoplanets
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 text-center">
-                <p className="text-xs text-gray-400">
-                  {showOnlyHabitable ? 'Showing life candidates only' : 'Click to filter by life potential'}
-                  {dynamicExoplanets.length > 0 && (
-                    <span className="block mt-1 text-purple-400">
-                      {dynamicExoplanets.length} from NASA
-                    </span>
-                  )}
-                </p>
               </div>
             </div>
           </div>
