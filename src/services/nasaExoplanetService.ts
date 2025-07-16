@@ -25,9 +25,8 @@ export interface FuzzyMatch {
 }
 
 class NASAExoplanetService {
-  private baseUrl = '/server/nasa-proxy.php';
+  private baseUrl = 'http://localhost:8000/nasa-proxy.php';
   private headers = {
-    'User-Agent': 'Mozilla/5.0 (Cosmic-LifeMapper/1.0)',
     'Content-Type': 'application/x-www-form-urlencoded'
   };
 
@@ -36,7 +35,7 @@ class NASAExoplanetService {
    */
   async loadPlanetNames(): Promise<string[]> {
     const query = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL ORDER BY pl_name';
-    const params = new URLSearchParams({
+    const body = new URLSearchParams({
       query,
       format: 'csv'
     });
@@ -45,7 +44,7 @@ class NASAExoplanetService {
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: this.headers,
-        body: params
+        body: body
       });
 
       if (!response.ok) {
@@ -98,7 +97,7 @@ class NASAExoplanetService {
       WHERE pl_name = '${safeName}'
     `;
 
-    const params = new URLSearchParams({
+    const body = new URLSearchParams({
       query: query.trim(),
       format: 'csv'
     });
@@ -107,7 +106,7 @@ class NASAExoplanetService {
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: this.headers,
-        body: params
+        body: body
       });
 
       if (!response.ok) {
