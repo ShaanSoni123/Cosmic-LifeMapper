@@ -148,15 +148,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
 
           {/* Floating Stats */}
-          <div className="mb-12">
-            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 max-w-2xl mx-auto">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
-                  <span className="text-white font-bold text-lg">4419</span>
+          <div className="mb-12 flex justify-start">
+            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-12 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 w-full max-w-4xl">
+              <div className="flex items-center space-x-8">
+                <div className="w-20 h-20 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
+                  <span className="text-white font-bold text-2xl">4419</span>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-white mb-1">4419</h3>
-                  <p className="text-cyan-300 font-medium">Worlds Discovered</p>
+                  <h3 className="text-5xl font-bold text-white mb-2">4419</h3>
+                  <p className="text-cyan-300 font-medium text-xl">Worlds Discovered</p>
+                  <p className="text-gray-400 text-sm mt-2">Scientifically analyzed exoplanets from across the galaxy</p>
                 </div>
               </div>
             </div>
