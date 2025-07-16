@@ -104,4 +104,4 @@ export const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
 );
 };
 
-export default app;
+export default MineralsChart;
