@@ -20,9 +20,6 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
   const [error, setError] = useState<string | null>(null);
   const [showParameterGuide, setShowParameterGuide] = useState(false);
 
-  // Add connection status
-  const [isConnected, setIsConnected] = useState(false);
-
   // Load planet names when modal opens
   useEffect(() => {
     if (isOpen && planetNames.length === 0) {
@@ -43,19 +40,14 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
   const loadPlanetNames = async () => {
     setIsLoadingNames(true);
     setError(null);
-    setIsConnected(false);
     try {
       const names = await nasaExoplanetService.loadPlanetNames();
       setPlanetNames(names);
-      setIsConnected(true);
       if (names.length === 0) {
-        setError('No planet names could be loaded from NASA Archive. Using fallback data.');
+        setError('No planet names could be loaded from NASA Archive');
       }
     } catch (err) {
-      setError('Failed to connect to NASA Exoplanet Archive. Using fallback data.');
-      // Load fallback data
-      const fallbackNames = await nasaExoplanetService.loadPlanetNames();
-      setPlanetNames(fallbackNames);
+      setError('Failed to connect to NASA Exoplanet Archive');
     } finally {
       setIsLoadingNames(false);
     }
@@ -117,14 +109,8 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
               <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                 NASA Exoplanet Archive
               </h2>
-              <p className="text-gray-400 text-sm flex items-center space-x-2">
-                <span>Search {planetNames.length.toLocaleString()} real exoplanets from NASA's database</span>
-                {isConnected && (
-                  <span className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-green-400 text-xs">Connected</span>
-                  </span>
-                )}
+              <p className="text-gray-400 text-sm">
+                Search {planetNames.length.toLocaleString()} real exoplanets from NASA's database
               </p>
             </div>
           </div>
@@ -173,14 +159,12 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
             {error && (
               <div className="p-4 bg-red-900/40 border border-red-500/50 rounded-xl mb-4">
                 <p className="text-red-300 text-sm">{error}</p>
-                {!isConnected && (
-                  <button
-                    onClick={loadPlanetNames}
-                    className="mt-2 text-red-400 hover:text-red-300 text-sm underline"
-                  >
-                    Try again
-                  </button>
-                )}
+                <button
+                  onClick={loadPlanetNames}
+                  className="mt-2 text-red-400 hover:text-red-300 text-sm underline"
+                >
+                  Try again
+                </button>
               </div>
             )}
 
@@ -216,16 +200,8 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
               {searchQuery && fuzzyMatches.length === 0 && !isLoadingNames && (
                 <div className="text-center py-8 text-gray-400">
                   <Globe className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No matching exoplanets found in current dataset</p>
+                  <p>No matching exoplanets found</p>
                   <p className="text-sm">Try a different search term</p>
-                </div>
-              )}
-              
-              {!searchQuery && planetNames.length > 0 && (
-                <div className="text-center py-8 text-gray-400">
-                  <Satellite className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Start typing to search exoplanets</p>
-                  <p className="text-sm">{planetNames.length.toLocaleString()} planets available</p>
                 </div>
               )}
             </div>
