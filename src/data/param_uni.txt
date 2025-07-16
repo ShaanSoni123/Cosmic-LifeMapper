@@ -1,0 +1,43 @@
+pl_dens              | double     | Planet Density
+pl_insolstr          | char       | Insolation Flux
+pl_eqtstr            | char       | Equilibrium Temperature
+pl_orbeccenstr       | char       | Eccentricity
+pl_orbinclstr        | char       | Inclination
+pl_orbper            | double     | Orbital Period
+pl_angsepstr         | char       | Angular Separation
+sy_snum              | int        | Number of Stars
+sy_pnum              | int        | Number of Planets
+sy_mnum              | int        | Number of Moons
+st_nphot             | int        | Number of Photometry Time Series
+st_nrvc              | int        | Number of Radial Velocity Time Series
+st_nspec             | int        | Number of Stellar Spectra Measurements
+pl_nnotes            | int        | Number of Notes
+pl_ntranspec         | int        | Number of Transmission Spectra
+pl_nespec            | int        | Number of Eclipse Spectra
+pl_ndispec           | int        | Number of Direct Imaging Spectra
+st_rad               | double     | Stellar Radius
+st_dens              | double     | Stellar Density
+st_mass              | double     | Stellar Mass
+st_age               | double     | Stellar Age
+st_logg              | double     | Stellar Surface Gravity
+st_lum               | double     | Stellar Luminosity
+st_met               | double     | Stellar Metallicity
+pl_bmassj            | double     | Planet Mass or Mass*sin(i)
+pl_ratror            | double     | Ratio of Planet to Stellar Radius
+
+--extra
+disc_pubdate         | char       | Discovery Publication Date
+disc_year            | int        | Discovery Year
+discoverymethod      | char       | Discovery Method
+disc_locale          | char       | Discovery Locale
+disc_facility        | char       | Discovery Facility
+disc_instrument      | char       | Discovery Instrument
+disc_telescope       | char       | Discovery Telescope
+disc_refname         | char       | Discovery Reference
+--
+pl_name              | char       | Planet Name
+pl_letter            | char       | Planet Letter
+hostname             | char       | Host Name
+hd_name              | char       | HD ID
+hip_name             | char       | HIP ID
+tic_id               | char       | TIC ID
