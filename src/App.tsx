@@ -2,23 +2,11 @@ import React from 'react';
 import { Exoplanet } from '../types/exoplanet';
 import { Mountain, Gem, Zap, Droplets } from 'lucide-react';
 
-// Dummy exoplanet data to test rendering
-const dummyExoplanet: Exoplanet = {
-  name: 'Kepler-22b',
-  minerals: {
-    iron: 30,
-    silicon: 20,
-    magnesium: 15,
-    carbon: 12,
-    water: 25
-  }
-};
-
 interface MineralsChartProps {
   exoplanet: Exoplanet;
 }
 
-const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
+export const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
   const minerals = [
     {
       name: 'Iron',
@@ -68,7 +56,7 @@ const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
         <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse"></div>
         <span>Mineral Composition</span>
       </h3>
-
+      
       <div className="space-y-6">
         {minerals.map((mineral, index) => {
           const IconComponent = mineral.icon;
@@ -76,7 +64,7 @@ const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
             <div key={index} className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${mineral.bgColor} border border-gray-700/30`}>
+                  <div className={p-3 rounded-xl bg-gradient-to-r ${mineral.bgColor} border border-gray-700/30}>
                     <IconComponent className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -88,9 +76,9 @@ const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
               </div>
               <div className="relative">
                 <div className="w-full bg-black/60 rounded-full h-3 overflow-hidden border border-gray-700/30">
-                  <div
-                    className={`h-3 rounded-full bg-gradient-to-r ${mineral.color} shadow-lg transition-all duration-1000 ease-out`}
-                    style={{ width: `${mineral.value}%` }}
+                  <div 
+                    className={h-3 rounded-full bg-gradient-to-r ${mineral.color} shadow-lg transition-all duration-1000 ease-out}
+                    style={{ width: ${mineral.value}% }}
                   ></div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-full animate-pulse"></div>
@@ -106,38 +94,12 @@ const MineralsChart: React.FC<MineralsChartProps> = ({ exoplanet }) => {
           <span>Geological Assessment</span>
         </h4>
         <p className="text-sm text-gray-300 leading-relaxed">
-          This cosmic world shows{' '}
-          <span className="text-cyan-400 font-semibold">
-            {exoplanet.minerals.water > 20
-              ? 'abundant'
-              : exoplanet.minerals.water > 10
-              ? 'moderate'
-              : 'limited'}
-          </span>{' '}
-          water presence and{' '}
-          <span className="text-purple-400 font-semibold">
-            {exoplanet.minerals.carbon > 10 ? 'significant' : 'minimal'}
-          </span>{' '}
-          carbon deposits, indicating{' '}
-          <span className="text-emerald-400 font-semibold">
-            {exoplanet.minerals.water > 15 && exoplanet.minerals.carbon > 8
-              ? 'promising'
-              : 'challenging'}
-          </span>{' '}
-          conditions for potential life formation and geological stability.
-        </p>
-      </div>
-    </div>
-  );
+          This cosmic world shows <span className="text-cyan-400 font-semibold">{exoplanet.minerals.water > 20 ? 'abundant' : exoplanet.minerals.water > 10 ? 'moderate' : 'limited'}</span>
+          {' '}water presence and <span className="text-purple-400 font-semibold">{exoplanet.minerals.carbon > 10 ? 'significant' : 'minimal'}</span> carbon deposits, 
+          {' '}indicating <span className="text-emerald-400 font-semibold">{exoplanet.minerals.water > 15 && exoplanet.minerals.carbon > 8 ? 'promising' : 'challenging'}</span>
+                {' '}conditions for potential life formation and geological stability.
+    </p>
+  </div>
+</div>
+);
 };
-
-// ✅ Wrap this in an App component for main.tsx
-const App: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-black p-10">
-      <MineralsChart exoplanet={dummyExoplanet} />
-    </div>
-  );
-};
-
-export default App;
