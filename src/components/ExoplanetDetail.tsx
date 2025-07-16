@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { Exoplanet } from '../types/exoplanet';
 import { ArrowLeft, Calendar, Globe, Thermometer, Star, Clock, Gauge } from 'lucide-react';
 import { HabitabilityCard } from './HabitabilityCard';
@@ -14,6 +15,14 @@ interface ExoplanetDetailProps {
 }
 
 export const ExoplanetDetail: React.FC<ExoplanetDetailProps> = ({ exoplanet, onBack }) => {
+  // Auto-scroll to top when component mounts (when planet is selected)
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [exoplanet.id]); // Trigger when planet changes
+
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Deep Space Background */}
