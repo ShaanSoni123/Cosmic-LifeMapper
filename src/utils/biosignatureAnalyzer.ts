@@ -10,6 +10,9 @@ export interface ChemicalConcentration {
   C2H6?: number;
   SO2?: number;
   H2S?: number;
+  He?: number;
+  Ar?: number;
+  Ne?: number;
 }
 
 export interface BiosignatureReport {
@@ -21,6 +24,9 @@ export interface BiosignatureReport {
   C2H6?: number;
   SO2?: number;
   H2S?: number;
+  He?: number;
+  Ar?: number;
+  Ne?: number;
   Temperature: number;
   HabitabilityScore: number;
 }
@@ -86,6 +92,30 @@ const CHEMICAL_SURVIVAL_DATA = {
     { range: [0.01, 0.1], survival: 30 },
     { range: [0.1, 1.0], survival: 10 },
     { range: [1.0, Infinity], survival: 2 }
+  ],
+  He: [
+    { range: [0, 1.0], survival: 95 },
+    { range: [1.0, 5.0], survival: 90 },
+    { range: [5.0, 15.0], survival: 85 },
+    { range: [15.0, 30.0], survival: 75 },
+    { range: [30.0, 50.0], survival: 60 },
+    { range: [50.0, Infinity], survival: 40 }
+  ],
+  Ar: [
+    { range: [0, 0.5], survival: 95 },
+    { range: [0.5, 2.0], survival: 90 },
+    { range: [2.0, 5.0], survival: 85 },
+    { range: [5.0, 10.0], survival: 75 },
+    { range: [10.0, 20.0], survival: 60 },
+    { range: [20.0, Infinity], survival: 45 }
+  ],
+  Ne: [
+    { range: [0, 0.1], survival: 95 },
+    { range: [0.1, 0.5], survival: 90 },
+    { range: [0.5, 2.0], survival: 85 },
+    { range: [2.0, 5.0], survival: 75 },
+    { range: [5.0, 10.0], survival: 60 },
+    { range: [10.0, Infinity], survival: 40 }
   ]
 };
 
@@ -171,16 +201,21 @@ export function atmosphereToChemicalConcentrations(atmosphere: {
   carbonDioxide: number;
   methane: number;
 }): ChemicalConcentration {
+  // Generate H2 concentration based on atmospheric conditions
+  const h2Concentration = atmosphere.methane > 1 ? 2.5 + Math.random() * 2 : Math.random() * 0.5;
+  
   return {
     O2: atmosphere.oxygen, // Direct percentage
     N2: atmosphere.nitrogen, // Direct percentage
     CO2: atmosphere.carbonDioxide, // Direct percentage
-    // Estimate other chemicals based on atmospheric composition
-    H2: Math.random() * 0.1, // Trace amounts
+    H2: h2Concentration, // Enhanced H2 calculation
     NH3: Math.random() * 0.01, // Very trace amounts
     C2H6: atmosphere.methane * 0.1, // Related to methane
     SO2: Math.random() * 0.001, // Volcanic/industrial
-    H2S: Math.random() * 0.001 // Biological/volcanic
+    H2S: Math.random() * 0.001, // Biological/volcanic
+    He: 2.5 + Math.random() * 2, // Noble gas presence
+    Ar: 0.5 + Math.random() * 1, // Argon trace amounts
+    Ne: 0.1 + Math.random() * 0.3 // Neon trace amounts
   };
 }
 

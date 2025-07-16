@@ -19,6 +19,9 @@ export const AtmosphericAnalysis: React.FC<AtmosphericAnalysisProps> = ({ exopla
       case 'CO2': return <Beaker className="w-4 h-4 text-orange-400" />;
       case 'H2O': return <Atom className="w-4 h-4 text-cyan-400" />;
       case 'CH4': return <Zap className="w-4 h-4 text-purple-400" />;
+      case 'H2': return <Atom className="w-4 h-4 text-yellow-400" />;
+      case 'He': return <Atom className="w-4 h-4 text-pink-400" />;
+      case 'Ar': return <Atom className="w-4 h-4 text-indigo-400" />;
       default: return <Atom className="w-4 h-4 text-gray-400" />;
     }
   };
@@ -32,6 +35,7 @@ export const AtmosphericAnalysis: React.FC<AtmosphericAnalysisProps> = ({ exopla
       case 'CH4': return 'from-purple-400 to-violet-500';
       case 'H2': return 'from-yellow-400 to-orange-500';
       case 'He': return 'from-pink-400 to-rose-500';
+      case 'Ar': return 'from-indigo-400 to-blue-500';
       case 'SO2': return 'from-red-400 to-pink-500';
       case 'O3': return 'from-indigo-400 to-purple-500';
       case 'NH3': return 'from-teal-400 to-cyan-500';
@@ -48,6 +52,8 @@ export const AtmosphericAnalysis: React.FC<AtmosphericAnalysisProps> = ({ exopla
       'CH4': 'Methane',
       'H2': 'Hydrogen',
       'He': 'Helium',
+      'Ar': 'Argon',
+      'Ne': 'Neon',
       'SO2': 'Sulfur Dioxide',
       'O3': 'Ozone',
       'NH3': 'Ammonia'

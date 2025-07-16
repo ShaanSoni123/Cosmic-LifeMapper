@@ -23,6 +23,14 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
       description: 'Essential for aerobic life'
     },
     {
+      name: 'Hydrogen (H₂)',
+      value: biosignature.chemicalAnalysis.H2 || 0,
+      icon: Atom,
+      color: 'from-yellow-400 via-orange-500 to-red-500',
+      bgColor: 'from-yellow-900/40 to-orange-900/40',
+      description: 'Reducing gas indicator'
+    },
+    {
       name: 'Nitrogen (N₂)',
       value: biosignature.chemicalAnalysis.N2 || 0,
       icon: Atom,
@@ -37,6 +45,22 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
       color: 'from-orange-400 via-red-500 to-pink-500',
       bgColor: 'from-orange-900/40 to-red-900/40',
       description: 'Greenhouse gas indicator'
+    },
+    {
+      name: 'Helium (He)',
+      value: biosignature.chemicalAnalysis.He || 0,
+      icon: Atom,
+      color: 'from-pink-400 via-purple-500 to-indigo-500',
+      bgColor: 'from-pink-900/40 to-purple-900/40',
+      description: 'Noble gas presence'
+    },
+    {
+      name: 'Argon (Ar)',
+      value: biosignature.chemicalAnalysis.Ar || 0,
+      icon: Atom,
+      color: 'from-indigo-400 via-blue-500 to-cyan-500',
+      bgColor: 'from-indigo-900/40 to-blue-900/40',
+      description: 'Inert atmospheric component'
     },
     {
       name: 'Temperature',
@@ -114,6 +138,31 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
         <p className="text-sm text-gray-300 leading-relaxed mb-3">
           <span className="text-cyan-400 font-semibold">{biosignature.classification}</span>
         </p>
+        
+        {/* Individual Gas Survival Scores */}
+        <div className="mt-4 p-4 bg-black/60 rounded-lg border border-cyan-500/20">
+          <h5 className="text-sm font-semibold text-white mb-3 flex items-center space-x-2">
+            <Activity className="w-4 h-4 text-cyan-400" />
+            <span>Individual Gas Survival Scores (out of 100)</span>
+          </h5>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+            {Object.entries(biosignature.chemicalAnalysis)
+              .filter(([key, value]) => key !== 'Temperature' && key !== 'HabitabilityScore' && typeof value === 'number')
+              .map(([gas, score]) => (
+                <div key={gas} className="flex justify-between items-center p-2 bg-black/40 rounded border border-gray-600/30">
+                  <span className="text-gray-300">{gas}:</span>
+                  <span className={`font-bold ${
+                    score >= 80 ? 'text-green-400' : 
+                    score >= 60 ? 'text-yellow-400' : 
+                    score >= 40 ? 'text-orange-400' : 'text-red-400'
+                  }`}>
+                    {Math.round(score)}/100
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+        
         <p className="text-xs text-gray-400 leading-relaxed">
           This analysis evaluates atmospheric chemical composition and temperature conditions to assess the potential for life-supporting biosignatures. 
           Higher scores indicate more favorable chemical environments for biological processes.
