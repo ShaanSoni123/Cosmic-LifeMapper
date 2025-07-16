@@ -6,7 +6,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/server': 'http://localhost:8000'
+      '/server': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/server/, '')
+      }
     }
   },
   optimizeDeps: {

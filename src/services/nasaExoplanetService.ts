@@ -25,9 +25,9 @@ export interface FuzzyMatch {
 }
 
 class NASAExoplanetService {
-  private baseUrl = 'http://localhost:8000/nasa-proxy.php';
+  private baseUrl = '/server/nasa-proxy.php';
   private headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/json'
   };
 
   /**
@@ -35,30 +35,37 @@ class NASAExoplanetService {
    */
   async loadPlanetNames(): Promise<string[]> {
     const query = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL ORDER BY pl_name';
-    const body = new URLSearchParams({
-      query,
-      format: 'csv'
-    });
-
+    
+    console.log('🔍 Loading planet names from NASA Archive...');
+    
     try {
       const response = await fetch(this.baseUrl, {
         method: 'POST',
-        headers: this.headers,
-        body: body
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query,
+          format: 'csv'
+        })
       });
 
+      console.log('NASA API Response Status:', response.status);
+      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('NASA API Error:', errorText);
+        console.error('NASA API Error Response:', errorText);
         throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
       const csvText = await response.text();
+      console.log('NASA API Response Length:', csvText.length);
+      console.log('NASA API Response Preview:', csvText.substring(0, 200));
       
       // Check if response contains error messages
-      if (csvText.includes('ERROR') || csvText.includes('Exception') || csvText.includes('<?php')) {
-        console.error('Invalid NASA API response:', csvText.substring(0, 200));
-        throw new Error('Invalid response from NASA API');
+      if (csvText.includes('ERROR') || csvText.includes('Exception')) {
+        console.error('NASA API returned error:', csvText.substring(0, 200));
+        throw new Error('NASA API returned an error');
       }
       
       const lines = csvText.trim().split('\n');
@@ -71,13 +78,25 @@ class NASAExoplanetService {
       // Skip header row and extract planet names
       const planetNames = lines.slice(1)
         .map(line => line.trim())
-        .filter(line => line && line !== 'null' && line !== '' && !line.includes('<?php'))
+        .filter(line => line && line !== 'null' && line !== '')
         .sort();
 
-      console.log(`✨ Loaded ${planetNames.length} exoplanet names from NASA Archive`);
+      console.log(`✅ Successfully loaded ${planetNames.length} exoplanet names from NASA Archive`);
       return planetNames;
+      
     } catch (error) {
-      console.error('Failed to load planet names from NASA:', error);
+      console.error('❌ Failed to load planet names from NASA:', error);
+      
+      // Fallback: try direct connection to test
+      try {
+        console.log('🔄 Trying direct test connection...');
+        const testResponse = await fetch('/server/test-nasa');
+        const testData = await testResponse.json();
+        console.log('Test connection result:', testData);
+      } catch (testError) {
+        console.error('Test connection also failed:', testError);
+      }
+      
       return [];
     }
   }
@@ -97,16 +116,16 @@ class NASAExoplanetService {
       WHERE pl_name = '${safeName}'
     `;
 
-    const body = new URLSearchParams({
-      query: query.trim(),
-      format: 'csv'
-    });
-
     try {
       const response = await fetch(this.baseUrl, {
         method: 'POST',
-        headers: this.headers,
-        body: body
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: query.trim(),
+          format: 'csv'
+        })
       });
 
       if (!response.ok) {
@@ -118,7 +137,7 @@ class NASAExoplanetService {
       const csvText = await response.text();
       
       // Check if response contains error messages
-      if (csvText.includes('ERROR') || csvText.includes('Exception') || csvText.includes('<?php')) {
+      if (csvText.includes('ERROR') || csvText.includes('Exception')) {
         console.error('Invalid NASA API response:', csvText.substring(0, 200));
         return null;
       }
