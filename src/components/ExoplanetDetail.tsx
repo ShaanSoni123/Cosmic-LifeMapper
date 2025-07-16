@@ -73,94 +73,94 @@ export const ExoplanetDetail: React.FC<ExoplanetDetailProps> = ({ exoplanet, onB
       </div>
       
       <div className="relative z-10 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-2 md:px-0">
           <div className="flex items-center mb-8">
             <button
               onClick={onBack}
-              className="flex items-center space-x-3 text-white hover:text-cyan-400 transition-all duration-300 backdrop-blur-xl bg-black/40 px-6 py-3 rounded-2xl border border-cyan-500/30 hover:border-cyan-400/70 transform hover:scale-105"
+              className="flex items-center space-x-2 md:space-x-3 text-white hover:text-cyan-400 transition-all duration-300 backdrop-blur-xl bg-black/40 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border border-cyan-500/30 hover:border-cyan-400/70 transform hover:scale-105 text-sm md:text-base"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 md:w-5 h-4 md:h-5" />
               <span>Return to Cosmos</span>
             </button>
           </div>
 
-          <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-500">
-            <div className="flex items-center justify-between mb-8">
+          <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-500">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4 md:gap-0">
               <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-3">{exoplanet.name}</h1>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5 text-gray-400" />
-                  <p className="text-gray-300 text-lg">Discovered in {exoplanet.discoveryYear}</p>
+                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-2 md:mb-3 break-words">{exoplanet.name}</h1>
+                <div className="flex items-center space-x-2 flex-wrap">
+                  <Calendar className="w-4 md:w-5 h-4 md:h-5 text-gray-400" />
+                  <p className="text-gray-300 text-base md:text-lg">Discovered in {exoplanet.discoveryYear}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="flex items-center space-x-3 mb-3">
-                  <Gauge className="w-6 h-6 text-cyan-400" />
-                  <span className="text-white font-semibold text-lg">Habitability Score</span>
+              <div className="text-left md:text-right">
+                <div className="flex items-center space-x-2 md:space-x-3 mb-2 md:mb-3">
+                  <Gauge className="w-5 md:w-6 h-5 md:h-6 text-cyan-400" />
+                  <span className="text-white font-semibold text-base md:text-lg">Habitability Score</span>
                 </div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">{exoplanet.habitabilityScore}/100</div>
+                <div className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">{exoplanet.habitabilityScore}/100</div>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="backdrop-blur-xl bg-black/40 rounded-2xl p-6 text-center border border-blue-500/30 hover:border-blue-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                  <Globe className="w-6 h-6 text-white" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+              <div className="backdrop-blur-xl bg-black/40 rounded-xl md:rounded-2xl p-3 md:p-6 text-center border border-blue-500/30 hover:border-blue-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2">
+                <div className="w-8 md:w-12 h-8 md:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 animate-pulse">
+                  <Globe className="w-4 md:w-6 h-4 md:h-6 text-white" />
                 </div>
-                <h3 className="text-white font-semibold mb-2">Distance</h3>
-                <p className="text-3xl font-bold text-blue-400 mb-1">{exoplanet.distance}</p>
-                <p className="text-sm text-gray-400">light years</p>
+                <h3 className="text-white font-semibold mb-1 md:mb-2 text-sm md:text-base">Distance</h3>
+                <p className="text-xl md:text-3xl font-bold text-blue-400 mb-1">{exoplanet.distance}</p>
+                <p className="text-xs md:text-sm text-gray-400">light years</p>
               </div>
-              <div className="backdrop-blur-xl bg-black/40 rounded-2xl p-6 text-center border border-red-500/30 hover:border-red-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2">
-                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                  <Thermometer className="w-6 h-6 text-white" />
+              <div className="backdrop-blur-xl bg-black/40 rounded-xl md:rounded-2xl p-3 md:p-6 text-center border border-red-500/30 hover:border-red-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2">
+                <div className="w-8 md:w-12 h-8 md:h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 animate-pulse">
+                  <Thermometer className="w-4 md:w-6 h-4 md:h-6 text-white" />
                 </div>
-                <h3 className="text-white font-semibold mb-2">Temperature</h3>
-                <p className="text-3xl font-bold text-red-400 mb-1">{exoplanet.temperature}</p>
-                <p className="text-sm text-gray-400">Kelvin</p>
+                <h3 className="text-white font-semibold mb-1 md:mb-2 text-sm md:text-base">Temperature</h3>
+                <p className="text-xl md:text-3xl font-bold text-red-400 mb-1">{exoplanet.temperature}</p>
+                <p className="text-xs md:text-sm text-gray-400">Kelvin</p>
               </div>
-              <div className="backdrop-blur-xl bg-black/40 rounded-2xl p-6 text-center border border-yellow-500/30 hover:border-yellow-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                  <Star className="w-6 h-6 text-white" />
+              <div className="backdrop-blur-xl bg-black/40 rounded-xl md:rounded-2xl p-3 md:p-6 text-center border border-yellow-500/30 hover:border-yellow-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2">
+                <div className="w-8 md:w-12 h-8 md:h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 animate-pulse">
+                  <Star className="w-4 md:w-6 h-4 md:h-6 text-white" />
                 </div>
-                <h3 className="text-white font-semibold mb-2">Mass</h3>
-                <p className="text-3xl font-bold text-yellow-400 mb-1">{exoplanet.mass}</p>
-                <p className="text-sm text-gray-400">Earth masses</p>
+                <h3 className="text-white font-semibold mb-1 md:mb-2 text-sm md:text-base">Mass</h3>
+                <p className="text-xl md:text-3xl font-bold text-yellow-400 mb-1">{exoplanet.mass}</p>
+                <p className="text-xs md:text-sm text-gray-400">Earth masses</p>
               </div>
-              <div className="backdrop-blur-xl bg-black/40 rounded-2xl p-6 text-center border border-green-500/30 hover:border-green-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                  <Clock className="w-6 h-6 text-white" />
+              <div className="backdrop-blur-xl bg-black/40 rounded-xl md:rounded-2xl p-3 md:p-6 text-center border border-green-500/30 hover:border-green-400/70 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2">
+                <div className="w-8 md:w-12 h-8 md:h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 animate-pulse">
+                  <Clock className="w-4 md:w-6 h-4 md:h-6 text-white" />
                 </div>
-                <h3 className="text-white font-semibold mb-2">Orbital Period</h3>
-                <p className="text-3xl font-bold text-green-400 mb-1">{exoplanet.orbitalPeriod}</p>
-                <p className="text-sm text-gray-400">Earth days</p>
+                <h3 className="text-white font-semibold mb-1 md:mb-2 text-sm md:text-base">Orbital Period</h3>
+                <p className="text-xl md:text-3xl font-bold text-green-400 mb-1">{exoplanet.orbitalPeriod}</p>
+                <p className="text-xs md:text-sm text-gray-400">Earth days</p>
               </div>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 mb-8">
-            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+          <div className="grid lg:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
+            <div className="transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
               <HabitabilityCard exoplanet={exoplanet} />
             </div>
-            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+            <div className="transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
               <ScientificAnalysis exoplanet={exoplanet} />
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 mb-8">
-            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+          <div className="grid lg:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
+            <div className="transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
               <AtmosphericAnalysis exoplanet={exoplanet} />
             </div>
-            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+            <div className="transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
               <MineralsChart exoplanet={exoplanet} />
             </div>
-            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+            <div className="transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
               <BiosignatureChart exoplanet={exoplanet} />
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-1 gap-8">
-            <div className="transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+          <div className="grid lg:grid-cols-1 gap-4 md:gap-8">
+            <div className="transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
               <BacteriaChart exoplanet={exoplanet} />
             </div>
           </div>

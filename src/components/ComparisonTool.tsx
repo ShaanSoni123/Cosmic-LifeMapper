@@ -220,65 +220,65 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack, allExopl
       </div>
       
       <div className="relative z-10 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-2 md:px-0">
           <div className="flex items-center mb-8">
             <button
               onClick={onBack}
-              className="flex items-center space-x-3 text-white hover:text-cyan-400 transition-all duration-300 backdrop-blur-xl bg-black/40 px-6 py-3 rounded-2xl border border-cyan-500/30 hover:border-cyan-400/70 transform hover:scale-105"
+              className="flex items-center space-x-2 md:space-x-3 text-white hover:text-cyan-400 transition-all duration-300 backdrop-blur-xl bg-black/40 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border border-cyan-500/30 hover:border-cyan-400/70 transform hover:scale-105 text-sm md:text-base"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 md:w-5 h-4 md:h-5" />
               <span>Return to Cosmos</span>
             </button>
           </div>
 
-          <div className="text-center mb-12 transform hover:scale-105 transition-transform duration-500">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent mb-4">
+          <div className="text-center mb-8 md:mb-12 transform hover:scale-105 transition-transform duration-500">
+            <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent mb-4">
               Cosmic World Comparison
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
+            <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto backdrop-blur-sm bg-black/20 rounded-xl md:rounded-2xl p-4 md:p-6 border border-cyan-500/20">
               Compare two exoplanets side by side to analyze their unique characteristics and potential for life
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="grid lg:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
             <ComparisonCard planet={selectedPlanets[0]} index={0} />
             <ComparisonCard planet={selectedPlanets[1]} index={1} />
           </div>
 
           {selectedPlanets[0] && selectedPlanets[1] && (
-            <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-purple-500/30 shadow-2xl shadow-purple-500/20 transform hover:scale-105 hover:-translate-y-2 transition-all duration-500">
-              <h3 className="text-2xl font-bold text-white mb-8 text-center">Comparison Analysis</h3>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-emerald-500/30 transform hover:scale-105 transition-all duration-300">
-                  <h4 className="text-lg font-semibold text-white mb-3">More Habitable</h4>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
+            <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-purple-500/30 shadow-2xl shadow-purple-500/20 transform hover:scale-105 hover:-translate-y-1 md:hover:-translate-y-2 transition-all duration-500">
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-6 md:mb-8 text-center">Comparison Analysis</h3>
+              <div className="grid md:grid-cols-3 gap-4 md:gap-8">
+                <div className="text-center p-4 md:p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-emerald-500/30 transform hover:scale-105 transition-all duration-300">
+                  <h4 className="text-base md:text-lg font-semibold text-white mb-2 md:mb-3">More Habitable</h4>
+                  <p className="text-lg md:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent break-words">
                     {selectedPlanets[0].habitabilityScore > selectedPlanets[1].habitabilityScore
                       ? selectedPlanets[0].name
                       : selectedPlanets[1].name}
                   </p>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-xs md:text-sm text-gray-400 mt-1 md:mt-2">
                     {Math.max(selectedPlanets[0].habitabilityScore, selectedPlanets[1].habitabilityScore)}% habitability
                   </p>
                 </div>
-                <div className="text-center p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-blue-500/30 transform hover:scale-105 transition-all duration-300">
-                  <h4 className="text-lg font-semibold text-white mb-3">Closer to Earth</h4>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                <div className="text-center p-4 md:p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-blue-500/30 transform hover:scale-105 transition-all duration-300">
+                  <h4 className="text-base md:text-lg font-semibold text-white mb-2 md:mb-3">Closer to Earth</h4>
+                  <p className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent break-words">
                     {selectedPlanets[0].distance < selectedPlanets[1].distance
                       ? selectedPlanets[0].name
                       : selectedPlanets[1].name}
                   </p>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-xs md:text-sm text-gray-400 mt-1 md:mt-2">
                     {Math.min(selectedPlanets[0].distance, selectedPlanets[1].distance)} light years
                   </p>
                 </div>
-                <div className="text-center p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-cyan-500/30 transform hover:scale-105 transition-all duration-300">
-                  <h4 className="text-lg font-semibold text-white mb-3">More Water</h4>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                <div className="text-center p-4 md:p-6 backdrop-blur-sm bg-black/40 rounded-xl border border-cyan-500/30 transform hover:scale-105 transition-all duration-300">
+                  <h4 className="text-base md:text-lg font-semibold text-white mb-2 md:mb-3">More Water</h4>
+                  <p className="text-lg md:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent break-words">
                     {selectedPlanets[0].minerals.water > selectedPlanets[1].minerals.water
                       ? selectedPlanets[0].name
                       : selectedPlanets[1].name}
                   </p>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-xs md:text-sm text-gray-400 mt-1 md:mt-2">
                     {Math.max(selectedPlanets[0].minerals.water, selectedPlanets[1].minerals.water)}% water content
                   </p>
                 </div>

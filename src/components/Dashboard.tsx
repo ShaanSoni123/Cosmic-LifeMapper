@@ -165,8 +165,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
 
           {/* Search and Controls */}
-          <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
-            <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+          <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
+            <div className="flex flex-col gap-4 md:gap-6 items-stretch md:items-center md:justify-between md:flex-row">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-400 w-5 h-5" />
                 <input
@@ -174,18 +174,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   placeholder="Search the infinite cosmos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-black/60 border border-cyan-500/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-cyan-400 backdrop-blur-sm transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-3 bg-black/60 border border-cyan-500/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-cyan-400 backdrop-blur-sm transition-all duration-300 text-sm md:text-base"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
               
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
+                <div className="flex items-center space-x-3 justify-center sm:justify-start">
                   <Filter className="w-5 h-5 text-purple-400" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'name' | 'habitability' | 'distance')}
-                    className="bg-black/60 border border-purple-500/50 rounded-xl text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/70 backdrop-blur-sm transition-all duration-300"
+                    className="bg-black/60 border border-purple-500/50 rounded-xl text-white px-3 md:px-4 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/70 backdrop-blur-sm transition-all duration-300 text-sm md:text-base"
                   >
                     <option value="habitability">Sort by Habitability</option>
                     <option value="distance">Sort by Distance</option>
@@ -193,31 +193,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </select>
                 </div>
                 
-                <button
-                  onClick={onCompareClick}
-                  className="flex items-center space-x-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-cyan-500/30"
-                >
-                  <BarChart3 className="w-5 h-5" />
-                  <span>Compare Worlds</span>
-                </button>
-                
-                <button
-                  onClick={() => setShowNASAModal(true)}
-                  className="flex items-center space-x-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-purple-500/30"
-                >
-                  <Database className="w-5 h-5" />
-                  <span>NASA Archive</span>
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={onCompareClick}
+                    className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 px-4 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-cyan-500/30 text-sm md:text-base"
+                  >
+                    <BarChart3 className="w-4 md:w-5 h-4 md:h-5" />
+                    <span>Compare</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowNASAModal(true)}
+                    className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 px-4 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-purple-500/30 text-sm md:text-base"
+                  >
+                    <Database className="w-4 md:w-5 h-4 md:h-5" />
+                    <span>NASA</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Floating Exoplanet Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {filteredExoplanets.map((exoplanet, index) => (
               <div
                 key={exoplanet.id}
-                className="transform hover:scale-105 hover:-translate-y-4 transition-all duration-500"
+                className="transform hover:scale-105 hover:-translate-y-2 md:hover:-translate-y-4 transition-all duration-500"
                 style={{
                   animationDelay: `${index * 0.1}s`
                 }}
@@ -231,17 +233,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {filteredExoplanets.length === 0 && (
-            <div className="text-center py-16 backdrop-blur-xl bg-black/40 rounded-3xl border border-gray-500/30">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-gray-700 to-gray-800 rounded-full flex items-center justify-center animate-pulse">
-                <Search className="w-12 h-12 text-gray-400" />
+            <div className="text-center py-8 md:py-16 backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl border border-gray-500/30">
+              <div className="w-16 md:w-24 h-16 md:h-24 mx-auto mb-4 md:mb-6 bg-gradient-to-r from-gray-700 to-gray-800 rounded-full flex items-center justify-center animate-pulse">
+                <Search className="w-8 md:w-12 h-8 md:h-12 text-gray-400" />
               </div>
-              <p className="text-gray-400 text-xl">
+              <p className="text-gray-400 text-lg md:text-xl px-4">
                 {showOnlyHabitable 
                   ? "No highly habitable worlds found in this sector of space." 
                   : "No cosmic worlds found in this sector of space."
                 }
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-gray-500 text-sm mt-2 px-4">
                 {showOnlyHabitable 
                   ? "Try showing all worlds or adjusting your search parameters." 
                   : "Try adjusting your search parameters to explore different regions."
