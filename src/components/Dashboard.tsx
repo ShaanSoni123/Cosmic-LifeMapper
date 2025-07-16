@@ -1,19 +1,33 @@
 import React, { useState } from 'react';
-import { exoplanets, EXOPLANET_COUNT } from '../data/exoplanets';
+import { exoplanets as staticExoplanets, EXOPLANET_COUNT } from '../data/exoplanets';
 import { ExoplanetCard } from './ExoplanetCard';
-import { Search, Filter, Rocket, BarChart3, Globe, Zap } from 'lucide-react';
+import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database } from 'lucide-react';
+import { NASASearchModal } from './NASASearchModal';
+import { Exoplanet } from '../types/exoplanet';
 
 interface DashboardProps {
   onExoplanetSelect: (id: string) => void;
   onCompareClick: () => void;
+  onAddNASAPlanet?: (planetData: any) => void;
+  dynamicExoplanets?: Exoplanet[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompareClick }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ 
+  onExoplanetSelect, 
+  onCompareClick, 
+  onAddNASAPlanet,
+  dynamicExoplanets = []
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'habitability' | 'distance'>('habitability');
   const [showOnlyHabitable, setShowOnlyHabitable] = useState(false);
+  const [showNASAModal, setShowNASAModal] = useState(false);
 
-  const filteredExoplanets = exoplanets
+  // Combine static and dynamic exoplanets
+  const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
+  const totalCount = allExoplanets.length;
+
+  const filteredExoplanets = allExoplanets
     .filter(planet => 
       planet.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (!showOnlyHabitable || planet.habitabilityScore >= 70) // Only show planets with 70%+ habitability
@@ -31,7 +45,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
       }
     });
 
-  const habitablePlanetsCount = exoplanets.filter(p => p.habitabilityScore >= 70).length;
+  const habitablePlanetsCount = allExoplanets.filter(p => p.habitabilityScore >= 70).length;
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -122,8 +136,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
               </h1>
             </div>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
-              Journey through the infinite cosmos to discover {EXOPLANET_COUNT} scientifically analyzed exoplanets. 
+              Journey through the infinite cosmos to discover {totalCount} scientifically analyzed exoplanets. 
               Explore their mysterious compositions, analyze their life potential, and compare their unique cosmic signatures.
+              {dynamicExoplanets.length > 0 && (
+                <span className="block mt-2 text-purple-300 font-medium">
+                  Including {dynamicExoplanets.length} real exoplanets from NASA's archive!
+                </span>
+              )}
             </p>
           </div>
 
@@ -163,6 +182,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
                   <BarChart3 className="w-5 h-5" />
                   <span>Compare Worlds</span>
                 </button>
+                
+                <button
+                  onClick={() => setShowNASAModal(true)}
+                  className="flex items-center space-x-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-purple-500/30"
+                >
+                  <Database className="w-5 h-5" />
+                  <span>NASA Archive</span>
+                </button>
               </div>
             </div>
           </div>
@@ -172,10 +199,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
             <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
-                  <span className="text-white font-bold text-lg">{EXOPLANET_COUNT}</span>
+                  <span className="text-white font-bold text-lg">{totalCount}</span>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-white mb-1">{EXOPLANET_COUNT}</h3>
+                  <h3 className="text-3xl font-bold text-white mb-1">{totalCount}</h3>
                   <p className="text-cyan-300 font-medium">Worlds Discovered</p>
                 </div>
               </div>
@@ -192,7 +219,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
               </div>
               <div className="mt-3 text-center">
                 <p className="text-xs text-emerald-400">
-                  {Math.round((habitablePlanetsCount / EXOPLANET_COUNT) * 100)}% of discovered worlds
+                  {Math.round((habitablePlanetsCount / totalCount) * 100)}% of discovered worlds
                 </p>
               </div>
             </div>
@@ -229,6 +256,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
               <div className="mt-4 text-center">
                 <p className="text-xs text-gray-400">
                   {showOnlyHabitable ? 'Showing life candidates only' : 'Click to filter by life potential'}
+                  {dynamicExoplanets.length > 0 && (
+                    <span className="block mt-1 text-purple-400">
+                      {dynamicExoplanets.length} from NASA
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -244,6 +276,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
               ) : (
                 <>
                   Displaying <span className="text-cyan-400 font-bold">{filteredExoplanets.length}</span> of <span className="text-purple-400 font-bold">{EXOPLANET_COUNT}</span> cosmic worlds
+                  {dynamicExoplanets.length > 0 && (
+                    <span className="block mt-1 text-sm">
+                      <span className="text-gray-500">Including</span> <span className="text-purple-400 font-bold">{dynamicExoplanets.length}</span> <span className="text-gray-500">from NASA Archive</span>
+                    </span>
+                  )}
                 </>
               )}
             </p>
@@ -286,6 +323,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onExoplanetSelect, onCompa
               </p>
             </div>
           )}
+
+          {/* NASA Search Modal */}
+          <NASASearchModal
+            isOpen={showNASAModal}
+            onClose={() => setShowNASAModal(false)}
+            onPlanetSelect={(planetData) => {
+              if (onAddNASAPlanet) {
+                onAddNASAPlanet(planetData);
+              }
+            }}
+          />
         </div>
       </div>
 

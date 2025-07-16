@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { ExoplanetDetail } from './components/ExoplanetDetail';
 import { ComparisonTool } from './components/ComparisonTool';
-import { exoplanets } from './data/exoplanets';
+import { exoplanets as staticExoplanets } from './data/exoplanets';
+import { Exoplanet } from './types/exoplanet';
 
 type View = 'dashboard' | 'detail' | 'compare';
 
@@ -11,9 +12,13 @@ function App() {
   try {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedExoplanetId, setSelectedExoplanetId] = useState<string | null>(null);
+  const [dynamicExoplanets, setDynamicExoplanets] = useState<Exoplanet[]>([]);
+
+  // Combine static and dynamic exoplanets
+  const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
 
   const selectedExoplanet = selectedExoplanetId 
-    ? exoplanets.find(p => p.id === selectedExoplanetId) 
+    ? allExoplanets.find(p => p.id === selectedExoplanetId) 
     : null;
 
   const handleExoplanetSelect = (id: string) => {
@@ -30,6 +35,9 @@ function App() {
     setCurrentView('compare');
   };
 
+  const handleAddNASAPlanet = (planetData: Exoplanet) => {
+    setDynamicExoplanets(prev => [...prev, planetData]);
+  };
   if (currentView === 'detail' && selectedExoplanet) {
     return (
       <ExoplanetDetail 
@@ -43,6 +51,7 @@ function App() {
     return (
       <ComparisonTool 
         onBack={handleBackToDashboard}
+        allExoplanets={allExoplanets}
       />
     );
   }
@@ -51,6 +60,8 @@ function App() {
     <Dashboard 
       onExoplanetSelect={handleExoplanetSelect}
       onCompareClick={handleCompareClick}
+      onAddNASAPlanet={handleAddNASAPlanet}
+      dynamicExoplanets={dynamicExoplanets}
     />
   );
   } catch (error) {

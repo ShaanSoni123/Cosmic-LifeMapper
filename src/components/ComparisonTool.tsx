@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Exoplanet } from '../types/exoplanet';
-import { exoplanets } from '../data/exoplanets';
 import { ArrowLeft, Globe, Thermometer, Star, Clock, Search } from 'lucide-react';
 
 interface ComparisonToolProps {
   onBack: () => void;
+  allExoplanets?: Exoplanet[];
 }
 
-export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
+export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack, allExoplanets = [] }) => {
   const [selectedPlanets, setSelectedPlanets] = useState<[Exoplanet | null, Exoplanet | null]>([null, null]);
   const [searchTerms, setSearchTerms] = useState<[string, string]>(['', '']);
 
@@ -24,7 +24,7 @@ export const ComparisonTool: React.FC<ComparisonToolProps> = ({ onBack }) => {
   };
 
   const getFilteredPlanets = (index: 0 | 1) => {
-    return exoplanets.filter(p => 
+    return allExoplanets.filter(p => 
       p.name.toLowerCase().includes(searchTerms[index].toLowerCase()) &&
       !selectedPlanets.includes(p)
     );
