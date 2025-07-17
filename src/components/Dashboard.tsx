@@ -170,59 +170,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Search and Controls */}
           <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
-            <div className="flex flex-col gap-4 md:gap-6 items-stretch md:items-center md:justify-between md:flex-row">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search the infinite cosmos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-black/60 border border-cyan-500/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-cyan-400 backdrop-blur-sm transition-all duration-300 text-sm md:text-base"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 sm:gap-6">
+              <button
+                onClick={onCompareClick}
+                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-cyan-500/30 text-sm md:text-base"
+              >
+                <BarChart3 className="w-4 md:w-5 h-4 md:h-5" />
+                <span>Compare Worlds</span>
+              </button>
               
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
-                <div className="flex items-center space-x-3 justify-center sm:justify-start">
-                  <Filter className="w-5 h-5 text-purple-400" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'name' | 'habitability' | 'distance')}
-                    className="bg-black/60 border border-purple-500/50 rounded-xl text-white px-3 md:px-4 py-2 md:py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/70 backdrop-blur-sm transition-all duration-300 text-sm md:text-base"
-                  >
-                    <option value="habitability">Sort by Habitability</option>
-                    <option value="distance">Sort by Distance</option>
-                    <option value="name">Sort by Name</option>
-                  </select>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={onCompareClick}
-                    className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 px-4 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-cyan-500/30 text-sm md:text-base"
-                  >
-                    <BarChart3 className="w-4 md:w-5 h-4 md:h-5" />
-                    <span>Compare</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => setShowNASAModal(true)}
-                    className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 px-4 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-purple-500/30 text-sm md:text-base"
-                  >
-                    <Database className="w-4 md:w-5 h-4 md:h-5" />
-                    <span>NASA</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => setShowTeamModal(true)}
-                    className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500 px-4 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-emerald-500/30 text-sm md:text-base"
-                  >
-                    <Users className="w-4 md:w-5 h-4 md:h-5" />
-                    <span>MEET OUR TEAM</span>
-                  </button>
-                </div>
-              </div>
+              <button
+                onClick={() => setShowNASAModal(true)}
+                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-purple-500/30 text-sm md:text-base"
+              >
+                <Database className="w-4 md:w-5 h-4 md:h-5" />
+                <span>NASA Exoplanets</span>
+              </button>
+              
+              <button
+                onClick={() => setShowTeamModal(true)}
+                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-emerald-500/30 text-sm md:text-base"
+              >
+                <Users className="w-4 md:w-5 h-4 md:h-5" />
+                <span>Meet Our Team</span>
+              </button>
             </div>
           </div>
 
