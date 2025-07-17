@@ -6,7 +6,7 @@ const PORT = 8000;
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -14,12 +14,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// NASA API proxy endpoint - matches the PHP endpoint path
+// NASA API proxy endpoint - matches the frontend expectations
 app.post('/nasa-proxy.php', async (req, res) => {
   try {
     const { default: fetch } = await import('node-fetch');
     
-    // Get query and format from POST body (matching PHP implementation)
+    // Get query and format from POST body
     const { query, format = 'csv' } = req.body;
     
     console.log('=== NASA API Request ===');
@@ -111,7 +111,7 @@ app.get('/test-nasa', async (req, res) => {
   try {
     const { default: fetch } = await import('node-fetch');
     
-    const testQuery = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL LIMIT 3';
+    const testQuery = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL LIMIT 5';
     const nasaUrl = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync';
     const postData = new URLSearchParams({
       query: testQuery,

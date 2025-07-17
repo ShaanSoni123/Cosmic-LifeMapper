@@ -20,6 +20,9 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
   const [error, setError] = useState<string | null>(null);
   const [showParameterGuide, setShowParameterGuide] = useState(false);
 
+  // Add connection status
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'fallback'>('checking');
+
   // Load planet names when modal opens
   useEffect(() => {
     if (isOpen && planetNames.length === 0) {
@@ -40,11 +43,16 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
   const loadPlanetNames = async () => {
     setIsLoadingNames(true);
     setError(null);
+    setConnectionStatus('checking');
     try {
       const names = await nasaExoplanetService.loadPlanetNames();
       setPlanetNames(names);
       if (names.length === 0) {
         setError('No planet names could be loaded from NASA Archive');
+        setConnectionStatus('fallback');
+      } else if (names.length < 100) {
+        // If we got a small number, it might be fallback data
+        setConnectionStatus('fallback');
       }
     } catch (err) {
       setError('Failed to connect to NASA Exoplanet Archive');
@@ -63,10 +71,12 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
       if (planetData) {
         setSelectedPlanet(planetData);
       } else {
+        setConnectionStatus('connected');
         setError('No detailed data found for this planet');
       }
     } catch (err) {
       setError('Failed to fetch planet details');
+      setConnectionStatus('fallback');
     } finally {
       setIsLoading(false);
     }
@@ -108,9 +118,17 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
             <div>
               <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                 NASA Exoplanet Archive
+                {connectionStatus === 'fallback' && (
+                  <span className="text-yellow-400 text-sm ml-2">(Offline Mode)</span>
+                )}
               </h2>
               <p className="text-gray-400 text-xs md:text-sm">
-                Search {planetNames.length.toLocaleString()} real exoplanets from NASA's database
+                {connectionStatus === 'connected' 
+                  ? `Search ${planetNames.length.toLocaleString()} real exoplanets from NASA's database`
+                  : connectionStatus === 'fallback'
+                  ? `Offline mode: ${planetNames.length} sample exoplanets available`
+                  : 'Connecting to NASA database...'
+                }
               </p>
             </div>
           </div>
@@ -166,6 +184,11 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
             {error && (
               <div className="p-3 md:p-4 bg-red-900/40 border border-red-500/50 rounded-xl mb-3 md:mb-4">
                 <p className="text-red-300 text-xs md:text-sm">{error}</p>
+                {connectionStatus === 'fallback' && (
+                  <p className="text-yellow-300 text-xs mt-2">
+                    Using offline mode with sample planets. Some features may be limited.
+                  </p>
+                )}
                 <button
                   onClick={loadPlanetNames}
                   className="mt-1 md:mt-2 text-red-400 hover:text-red-300 text-xs md:text-sm underline"
