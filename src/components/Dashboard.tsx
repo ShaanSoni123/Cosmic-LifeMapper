@@ -4,6 +4,7 @@ import { ExoplanetCard } from './ExoplanetCard';
 import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database } from 'lucide-react';
 import { NASASearchModal } from './NASASearchModal';
 import { Exoplanet } from '../types/exoplanet';
+import { TeamSection } from './TeamSection';
 
 interface DashboardProps {
   onExoplanetSelect: (id: string) => void;
@@ -163,6 +164,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
+
+          {/* Team Section */}
+          <TeamSection />
 
           {/* Search and Controls */}
           <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
