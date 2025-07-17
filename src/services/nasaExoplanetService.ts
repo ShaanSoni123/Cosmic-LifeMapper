@@ -25,7 +25,7 @@ export interface FuzzyMatch {
 }
 
 class NASAExoplanetService {
-  private baseUrl = '/server/nasa-proxy.php';
+  private baseUrl = '/api/nasa-proxy.php';
   private fallbackPlanets: string[] = [
     'Kepler-452b', 'TRAPPIST-1e', 'Proxima Centauri b', 'Kepler-186f', 'Gliese 667 Cc',
     'HD 40307g', 'Kepler-62f', 'Tau Ceti e', 'Wolf 1061c', 'K2-18b',
