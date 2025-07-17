@@ -226,6 +226,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
+          {/* Exoplanet Section Header */}
+          <div className="mb-6 md:mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                  Here are some several exoplanets
+                </h2>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search exoplanets..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 bg-black/60 border border-cyan-500/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-cyan-400 backdrop-blur-sm transition-all duration-300 text-sm w-64"
+                  />
+                </div>
+                
+                {/* Filter Options */}
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-purple-400" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'name' | 'habitability' | 'distance')}
+                    className="bg-black/60 border border-purple-500/50 rounded-xl text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500/70 backdrop-blur-sm transition-all duration-300 text-sm"
+                  >
+                    <option value="habitability">Sort by Habitability</option>
+                    <option value="distance">Sort by Distance</option>
+                    <option value="name">Sort by Name</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Floating Exoplanet Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {filteredExoplanets.map((exoplanet, index) => (
