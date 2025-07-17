@@ -53,17 +53,18 @@ class NASAExoplanetService {
         AND pl_rade IS NOT NULL 
         AND pl_bmasse IS NOT NULL
       ORDER BY pl_name
-      LIMIT 1000
+      LIMIT 2000
     `.trim();
     
     console.log('🔍 Loading planet names from NASA Archive with API key...');
     console.log('🔑 API Key present:', !!this.apiKey);
     
     try {
-      const response = await fetch(this.baseUrl, {
+      const response = await fetch('/api/nasa-proxy.php', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'text/csv'
         },
         body: JSON.stringify({
           query,
@@ -76,7 +77,8 @@ class NASAExoplanetService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('NASA API Error:', errorText);
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        console.log('🔄 Falling back to sample data...');
+        return this.fallbackPlanets.sort();
       }
 
       const csvText = await response.text();
@@ -86,13 +88,15 @@ class NASAExoplanetService {
       // Check if response contains error messages
       if (csvText.includes('ERROR') || csvText.includes('Exception') || csvText.length < 50) {
         console.error('Invalid NASA API response:', csvText.substring(0, 200));
-        throw new Error('Invalid NASA API response');
+        console.log('🔄 Using fallback data due to API error...');
+        return this.fallbackPlanets.sort();
       }
       
       const lines = csvText.trim().split('\n');
       
       if (lines.length < 2) {
-        throw new Error('No planet data received');
+        console.log('🔄 No planet data received, using fallback...');
+        return this.fallbackPlanets.sort();
       }
       
       // Skip header row and extract planet names
@@ -104,7 +108,7 @@ class NASAExoplanetService {
       console.log(`✅ Successfully loaded ${planetNames.length} exoplanet names from NASA Archive`);
       console.log('Sample planets:', planetNames.slice(0, 5));
       
-      return planetNames;
+      return planetNames.length > 0 ? planetNames : this.fallbackPlanets.sort();
       
     } catch (error) {
       console.error('❌ Failed to load planet names from NASA:', error);
@@ -137,10 +141,11 @@ class NASAExoplanetService {
     console.log('🔍 Fetching planet details for:', planetName);
 
     try {
-      const response = await fetch(this.baseUrl, {
+      const response = await fetch('/api/nasa-proxy.php', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'text/csv'
         },
         body: JSON.stringify({
           query: query,
@@ -151,7 +156,8 @@ class NASAExoplanetService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('NASA API Error:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.log('🔄 Generating fallback data for:', planetName);
+        return this.generateFallbackPlanetData(planetName);
       }
 
       const csvText = await response.text();

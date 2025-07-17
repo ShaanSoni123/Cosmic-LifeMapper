@@ -184,11 +184,6 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
             {error && (
               <div className="p-3 md:p-4 bg-red-900/40 border border-red-500/50 rounded-xl mb-3 md:mb-4">
                 <p className="text-red-300 text-xs md:text-sm">{error}</p>
-                {connectionStatus === 'fallback' && (
-                  <p className="text-yellow-300 text-xs mt-2">
-                    Using offline mode with sample planets. Some features may be limited.
-                  </p>
-                )}
                 <button
                   onClick={loadPlanetNames}
                   className="mt-1 md:mt-2 text-red-400 hover:text-red-300 text-xs md:text-sm underline"
@@ -199,7 +194,7 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
             )}
 
             {/* Search Results */}
-            <div className="space-y-2 max-h-64 md:max-h-96 overflow-y-auto">
+            <div className="space-y-2 max-h-64 md:max-h-96 overflow-y-auto custom-scrollbar">
               {fuzzyMatches.map((match, index) => (
                 <button
                   key={index}
@@ -227,11 +222,19 @@ export const NASASearchModal: React.FC<NASASearchModalProps> = ({ isOpen, onClos
                 </button>
               ))}
 
-              {searchQuery && fuzzyMatches.length === 0 && !isLoadingNames && (
+              {searchQuery && fuzzyMatches.length === 0 && !isLoadingNames && planetNames.length > 0 && (
                 <div className="text-center py-6 md:py-8 text-gray-400">
                   <Globe className="w-8 md:w-12 h-8 md:h-12 mx-auto mb-2 md:mb-3 opacity-50" />
                   <p className="text-sm md:text-base">No matching exoplanets found</p>
                   <p className="text-xs md:text-sm">Try a different search term</p>
+                </div>
+              )}
+              
+              {!searchQuery && planetNames.length > 0 && (
+                <div className="text-center py-6 md:py-8 text-gray-400">
+                  <Globe className="w-8 md:w-12 h-8 md:h-12 mx-auto mb-2 md:mb-3 opacity-50" />
+                  <p className="text-sm md:text-base">Start typing to search</p>
+                  <p className="text-xs md:text-sm">{planetNames.length.toLocaleString()} planets available</p>
                 </div>
               )}
             </div>
