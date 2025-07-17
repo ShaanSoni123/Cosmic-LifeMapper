@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { exoplanets as staticExoplanets, EXOPLANET_COUNT } from '../data/exoplanets';
 import { ExoplanetCard } from './ExoplanetCard';
-import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database } from 'lucide-react';
+import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database, Users } from 'lucide-react';
 import { NASASearchModal } from './NASASearchModal';
 import { Exoplanet } from '../types/exoplanet';
 import { TeamSection } from './TeamSection';
@@ -23,6 +23,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [sortBy, setSortBy] = useState<'name' | 'habitability' | 'distance'>('habitability');
   const [showOnlyHabitable, setShowOnlyHabitable] = useState(false);
   const [showNASAModal, setShowNASAModal] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false);
 
   // Combine static and dynamic exoplanets
   const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
@@ -166,7 +167,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
 
           {/* Team Section */}
-          <TeamSection />
 
           {/* Search and Controls */}
           <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
@@ -212,6 +212,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   >
                     <Database className="w-4 md:w-5 h-4 md:h-5" />
                     <span>NASA</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowTeamModal(true)}
+                    className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500 px-4 md:px-6 py-2 md:py-3 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-emerald-500/30 text-sm md:text-base"
+                  >
+                    <Users className="w-4 md:w-5 h-4 md:h-5" />
+                    <span>MEET OUR TEAM</span>
                   </button>
                 </div>
               </div>
@@ -265,6 +273,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onAddNASAPlanet(planetData);
               }
             }}
+          />
+
+          {/* Team Modal */}
+          <TeamSection
+            isOpen={showTeamModal}
+            onClose={() => setShowTeamModal(false)}
           />
         </div>
       </div>
