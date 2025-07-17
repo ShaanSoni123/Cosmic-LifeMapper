@@ -1,5 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = 8000;
@@ -14,7 +18,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// NASA API proxy endpoint - matches the frontend expectations
+// NASA API proxy endpoint with API key
 app.post('/nasa-proxy.php', async (req, res) => {
   try {
     const { default: fetch } = await import('node-fetch');
@@ -25,30 +29,37 @@ app.post('/nasa-proxy.php', async (req, res) => {
     console.log('=== NASA API Request ===');
     console.log('Query:', query);
     console.log('Format:', format);
+    console.log('API Key:', process.env.VITE_NASA_API_KEY ? 'Present' : 'Missing');
     
     if (!query) {
       console.error('No query provided');
       return res.status(400).json({ error: 'Query parameter is required.' });
     }
     
-    // Build NASA API URL
+    // Build NASA API URL with API key
     const nasaUrl = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync';
     const postData = new URLSearchParams({
       query: query,
       format: format
     });
+
+    // Add API key if available
+    if (process.env.VITE_NASA_API_KEY) {
+      postData.append('api_key', process.env.VITE_NASA_API_KEY);
+    }
     
     console.log('Sending request to NASA API...');
     console.log('URL:', nasaUrl);
     console.log('Body:', postData.toString());
     
-    // Make request to NASA API with proper headers
+    // Make request to NASA API with proper headers and API key
     const response = await fetch(nasaUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': 'Cosmic-LifeMapper/1.0 (Node.js Proxy)',
-        'Accept': 'text/csv,text/plain,*/*'
+        'Accept': 'text/csv,text/plain,*/*',
+        ...(process.env.VITE_NASA_API_KEY && { 'X-API-Key': process.env.VITE_NASA_API_KEY })
       },
       body: postData.toString(),
       timeout: 30000
@@ -60,6 +71,22 @@ app.post('/nasa-proxy.php', async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('NASA API Error Response:', errorText);
+      
+      // Handle rate limiting or authentication errors
+      if (response.status === 429) {
+        return res.status(429).json({ 
+          error: 'NASA API rate limit exceeded. Please try again later.',
+          details: errorText 
+        });
+      }
+      
+      if (response.status === 401 || response.status === 403) {
+        return res.status(401).json({ 
+          error: 'NASA API authentication failed. Please check API key.',
+          details: errorText 
+        });
+      }
+      
       throw new Error(`NASA API responded with status: ${response.status} - ${errorText}`);
     }
     
@@ -106,26 +133,32 @@ app.post('/nasa-proxy.php', async (req, res) => {
   }
 });
 
-// Test endpoint to verify NASA API connectivity
+// Enhanced test endpoint with API key
 app.get('/test-nasa', async (req, res) => {
   try {
     const { default: fetch } = await import('node-fetch');
     
-    const testQuery = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL LIMIT 5';
+    const testQuery = 'SELECT DISTINCT pl_name FROM ps WHERE pl_name IS NOT NULL LIMIT 10';
     const nasaUrl = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync';
     const postData = new URLSearchParams({
       query: testQuery,
       format: 'csv'
     });
+
+    // Add API key if available
+    if (process.env.VITE_NASA_API_KEY) {
+      postData.append('api_key', process.env.VITE_NASA_API_KEY);
+    }
     
-    console.log('Testing NASA API connection...');
+    console.log('Testing NASA API connection with API key...');
     
     const response = await fetch(nasaUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': 'Cosmic-LifeMapper/1.0 (Test)',
-        'Accept': 'text/csv'
+        'Accept': 'text/csv',
+        ...(process.env.VITE_NASA_API_KEY && { 'X-API-Key': process.env.VITE_NASA_API_KEY })
       },
       body: postData.toString(),
       timeout: 15000
@@ -138,13 +171,16 @@ app.get('/test-nasa', async (req, res) => {
       statusCode: response.status,
       dataLength: data.length,
       preview: data.substring(0, 300),
-      headers: Object.fromEntries(response.headers.entries())
+      headers: Object.fromEntries(response.headers.entries()),
+      apiKeyPresent: !!process.env.VITE_NASA_API_KEY,
+      samplePlanets: data.split('\n').slice(1, 6).filter(line => line.trim())
     });
     
   } catch (error) {
     res.status(500).json({
       status: 'ERROR',
-      error: error.message
+      error: error.message,
+      apiKeyPresent: !!process.env.VITE_NASA_API_KEY
     });
   }
 });
@@ -154,7 +190,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    port: PORT
+    port: PORT,
+    apiKeyConfigured: !!process.env.VITE_NASA_API_KEY
   });
 });
 
@@ -162,6 +199,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     message: 'NASA Exoplanet Archive Proxy Server',
+    apiKeyConfigured: !!process.env.VITE_NASA_API_KEY,
     endpoints: {
       'POST /nasa-proxy.php': 'Proxy requests to NASA API',
       'GET /test-nasa': 'Test NASA API connectivity',
@@ -174,5 +212,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 NASA API proxy server running on http://localhost:${PORT}`);
   console.log('📡 Ready to proxy requests to NASA Exoplanet Archive');
+  console.log('🔑 API Key configured:', !!process.env.VITE_NASA_API_KEY);
   console.log('🔗 Test connectivity: http://localhost:' + PORT + '/test-nasa');
 });
