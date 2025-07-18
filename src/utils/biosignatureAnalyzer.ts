@@ -1,6 +1,130 @@
 // Biosignature Analysis System for Enhanced Habitability Scoring
 // Based on atmospheric chemical composition and survival rates
 
+// Atmospheric Gas Survival Analysis System
+export interface AtmosphericGasData {
+  H2: number;
+  O2: number;
+  N2: number;
+  CO2: number;
+  NH3: number;
+  C2H6: number;
+  SO2: number;
+  H2S: number;
+}
+
+export interface SurvivalRange {
+  range: [number, number];
+  survival: number;
+}
+
+// Gas survival data mapping (concentration ranges to survival percentages)
+const GAS_SURVIVAL_RANGES: { [key: string]: SurvivalRange[] } = {
+  H2: [
+    { range: [0, 2.5], survival: 20 },
+    { range: [2.5, 5.0], survival: 25 },
+    { range: [5.0, 7.5], survival: 30 },
+    { range: [7.5, 10.0], survival: 35 },
+    { range: [10.0, 12.5], survival: 40 }
+  ],
+  O2: [
+    { range: [0, 2.5], survival: 0 },
+    { range: [2.5, 5.0], survival: 0 },
+    { range: [5.0, 7.5], survival: 30 },
+    { range: [7.5, 10.0], survival: 42.5 },
+    { range: [10.0, 12.5], survival: 75 }
+  ],
+  N2: [
+    { range: [0, 2.5], survival: 0 },
+    { range: [2.5, 5.0], survival: 20 },
+    { range: [5.0, 7.5], survival: 23.75 },
+    { range: [7.5, 10.0], survival: 27.5 },
+    { range: [10.0, 12.5], survival: 31.25 }
+  ],
+  CO2: [
+    { range: [0, 2.5], survival: 65 },
+    { range: [2.5, 5.0], survival: 52.5 },
+    { range: [5.0, 7.5], survival: 38.75 },
+    { range: [7.5, 10.0], survival: 25 },
+    { range: [10.0, 12.5], survival: 0 }
+  ],
+  NH3: [
+    { range: [0, 2.5], survival: 30 },
+    { range: [2.5, 5.0], survival: 50 },
+    { range: [5.0, 7.5], survival: 37.5 },
+    { range: [7.5, 10.0], survival: 25 },
+    { range: [10.0, 12.5], survival: 12.5 }
+  ],
+  C2H6: [
+    { range: [0, 2.5], survival: 100 },
+    { range: [2.5, 5.0], survival: 97.75 },
+    { range: [5.0, 7.5], survival: 94 },
+    { range: [7.5, 10.0], survival: 89 },
+    { range: [10.0, 12.5], survival: 84 }
+  ],
+  SO2: [
+    { range: [0, 2.5], survival: 100 },
+    { range: [2.5, 5.0], survival: 0 },
+    { range: [5.0, 7.5], survival: 0 },
+    { range: [7.5, 10.0], survival: 0 },
+    { range: [10.0, 12.5], survival: 0 }
+  ],
+  H2S: [
+    { range: [0, 2.5], survival: 100 },
+    { range: [2.5, 5.0], survival: 0 },
+    { range: [5.0, 7.5], survival: 0 },
+    { range: [7.5, 10.0], survival: 0 },
+    { range: [10.0, 12.5], survival: 0 }
+  ]
+};
+
+/**
+ * Calculate survival score for a specific gas concentration
+ */
+function getGasSurvivalScore(gas: keyof AtmosphericGasData, concentration: number): number {
+  const ranges = GAS_SURVIVAL_RANGES[gas];
+  if (!ranges) return 0;
+
+  for (const range of ranges) {
+    const [low, high] = range.range;
+    if (concentration >= low && concentration < high) {
+      return range.survival;
+    }
+  }
+  
+  // If concentration is above all ranges, use the last range's survival score
+  return ranges[ranges.length - 1].survival;
+}
+
+/**
+ * Calculate atmospheric survival analysis
+ */
+export function calculateAtmosphericSurvival(gasData: AtmosphericGasData): {
+  individualScores: { [key: string]: number };
+  averageScore: number;
+  totalScore: number;
+} {
+  const individualScores: { [key: string]: number } = {};
+  let totalScore = 0;
+  let gasCount = 0;
+
+  // Calculate survival score for each gas
+  for (const [gas, concentration] of Object.entries(gasData)) {
+    const survivalScore = getGasSurvivalScore(gas as keyof AtmosphericGasData, concentration);
+    individualScores[gas] = survivalScore;
+    totalScore += survivalScore;
+    gasCount++;
+  }
+
+  const averageScore = gasCount > 0 ? totalScore / gasCount : 0;
+
+  return {
+    individualScores,
+    averageScore: Math.round(averageScore * 100) / 100,
+    totalScore: Math.round(averageScore) // Final survival score out of 100
+  };
+}
+
 export interface ChemicalConcentration {
   H2?: number;
   O2?: number;
@@ -201,21 +325,22 @@ export function atmosphereToChemicalConcentrations(atmosphere: {
   carbonDioxide: number;
   methane: number;
 }): ChemicalConcentration {
-  // Generate H2 concentration based on atmospheric conditions
-  const h2Concentration = atmosphere.methane > 1 ? 2.5 + Math.random() * 2 : Math.random() * 0.5;
+  // Convert percentages to more realistic concentration ranges for survival analysis
+  const h2Concentration = atmosphere.methane > 1 ? 3.5 + Math.random() * 4 : Math.random() * 2.5;
+  const nh3Concentration = Math.random() * 5; // 0-5 range
+  const c2h6Concentration = atmosphere.methane * 0.3 + Math.random() * 2; // Related to methane
+  const so2Concentration = Math.random() * 3; // 0-3 range
+  const h2sConcentration = Math.random() * 2.5; // 0-2.5 range
   
   return {
-    O2: atmosphere.oxygen, // Direct percentage
-    N2: atmosphere.nitrogen, // Direct percentage
-    CO2: atmosphere.carbonDioxide, // Direct percentage
+    O2: Math.min(12.5, atmosphere.oxygen * 0.6), // Scale down to fit survival ranges
+    N2: Math.min(12.5, atmosphere.nitrogen * 0.15), // Scale down to fit survival ranges
+    CO2: Math.min(12.5, atmosphere.carbonDioxide * 1.2), // Scale to fit survival ranges
     H2: h2Concentration, // Enhanced H2 calculation
-    NH3: Math.random() * 0.01, // Very trace amounts
-    C2H6: atmosphere.methane * 0.1, // Related to methane
-    SO2: Math.random() * 0.001, // Volcanic/industrial
-    H2S: Math.random() * 0.001, // Biological/volcanic
-    He: 2.5 + Math.random() * 2, // Noble gas presence
-    Ar: 0.5 + Math.random() * 1, // Argon trace amounts
-    Ne: 0.1 + Math.random() * 0.3 // Neon trace amounts
+    NH3: nh3Concentration,
+    C2H6: c2h6Concentration,
+    SO2: so2Concentration,
+    H2S: h2sConcentration
   };
 }
 
