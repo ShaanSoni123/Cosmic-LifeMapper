@@ -119,7 +119,7 @@ export const AtmosphericAnalysis: React.FC<AtmosphericAnalysisProps> = ({ exopla
                   {getGasIcon(gas)}
                 </div>
                 <div>
-                  <span className="text-white font-medium text-lg">{getGasName(gas)} ({gas})</span>
+                  <span className="text-white font-medium text-lg">{getGasName(gas)} ({gas === 'CO2' ? 'CO₂' : gas === 'N2' ? 'N₂' : gas === 'O2' ? 'O₂' : gas === 'H2O' ? 'H₂O' : gas === 'CH4' ? 'CH₄' : gas === 'H2' ? 'H₂' : gas === 'SO2' ? 'SO₂' : gas === 'O3' ? 'O₃' : gas === 'NH3' ? 'NH₃' : gas})</span>
                   <p className="text-xs text-gray-400">
                     {report.majorComponents.includes(gas) ? 'Major component' :
                      report.minorComponents.includes(gas) ? 'Minor component' :

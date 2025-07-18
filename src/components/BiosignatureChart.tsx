@@ -163,7 +163,16 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
             <div key={gas} className="p-3 bg-black/60 rounded-lg border border-gray-600/30 text-center">
               <div className="flex items-center justify-center space-x-1 mb-1">
                 <Atom className="w-3 h-3 text-gray-400" />
-                <span className="text-xs text-gray-300 font-medium">{gas}</span>
+                <span className="text-xs text-gray-300 font-medium">
+                  {gas === 'H2' ? 'H₂' : 
+                   gas === 'O2' ? 'O₂' : 
+                   gas === 'N2' ? 'N₂' : 
+                   gas === 'CO2' ? 'CO₂' : 
+                   gas === 'NH3' ? 'NH₃' : 
+                   gas === 'C2H6' ? 'C₂H₆' : 
+                   gas === 'SO2' ? 'SO₂' : 
+                   gas === 'H2S' ? 'H₂S' : gas}
+                </span>
               </div>
               <div className="text-sm">
                 <span className="text-gray-400">{atmosphericGasData[gas as keyof AtmosphericGasData].toFixed(1)}</span>

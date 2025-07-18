@@ -336,7 +336,7 @@ export function atmosphereToChemicalConcentrations(atmosphere: {
     O2: Math.min(12.5, atmosphere.oxygen * 0.6), // Scale down to fit survival ranges
     N2: Math.min(12.5, atmosphere.nitrogen * 0.15), // Scale down to fit survival ranges
     CO2: Math.min(12.5, atmosphere.carbonDioxide * 1.2), // Scale to fit survival ranges
-    H2: h2Concentration, // Enhanced H2 calculation
+    H2: h2Concentration, // Enhanced H₂ calculation
     NH3: nh3Concentration,
     C2H6: c2h6Concentration,
     SO2: so2Concentration,
