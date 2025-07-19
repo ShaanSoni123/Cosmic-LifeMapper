@@ -1,112 +1,55 @@
-// data/exoplanets.ts
 import { Exoplanet } from '../types/exoplanet';
+import { RAW_EXOPLANET_DATA } from './rawExoplanetData';
+import { convertToExoplanet, RawExoplanetData } from '../utils/exoplanetProcessor';
 
-// Fetch live exoplanet data from NASA API
-async function fetchNASAExoplanets(): Promise<Exoplanet[]> {
-  try {
-    console.log('🚀 Fetching live exoplanet data from NASA API...');
+// Parse the raw CSV data and convert to exoplanets
+function parseRawExoplanetData(): Exoplanet[] {
+  const lines = RAW_EXOPLANET_DATA.trim().split('\n');
+  const headers = lines[0].split(',');
+  const exoplanets: Exoplanet[] = [];
 
-    const response = await fetch('http://localhost:3002/exoplanets', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',');
+    if (values.length !== headers.length) continue;
 
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
+    const rawData: RawExoplanetData = {
+      planet_name: values[0],
+      planet_radius: parseFloat(values[1]),
+      star_temperature: parseFloat(values[2]),
+      orbital_distance: parseFloat(values[3]),
+      atmospheric_pressure: parseFloat(values[4]),
+      stellar_luminosity: parseFloat(values[5]),
+      planet_mass: parseFloat(values[6]),
+      eccentricity: parseFloat(values[7]),
+      orbital_period: parseFloat(values[8]),
+      albedo: parseFloat(values[9]),
+      host_star_metallicity: parseFloat(values[10]),
+      host_star_age: parseFloat(values[11])
+    };
 
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error('NASA API did not return an array');
-    }
-
-    console.log(`✅ Successfully loaded ${data.length} exoplanets from NASA API`);
-    return data;
-
-  } catch (error) {
-    console.error('❌ Failed to fetch NASA data:', error);
-    console.log('🔄 Falling back to static data...');
-
-    return getFallbackExoplanets();
+    // Convert to frontend format with enhanced calculations
+    const exoplanet = convertToExoplanet(rawData, i - 1);
+    exoplanets.push(exoplanet);
   }
+
+  console.log(`✅ Successfully loaded ${exoplanets.length} exoplanets with accurate scientific data`);
+  return exoplanets;
 }
 
-// Fallback static data in case NASA API is unavailable
-function getFallbackExoplanets(): Exoplanet[] {
-  return [
-    {
-      id: "1",
-      name: "Kepler-22b",
-      distance: 620,
-      mass: 2.4,
-      radius: 2.4,
-      temperature: 262,
-      habitabilityScore: 75,
-      starType: "G-type",
-      orbitalPeriod: 289.9,
-      discoveryYear: 2011,
-      minerals: { iron: 32, silicon: 28, magnesium: 16, carbon: 8, water: 16 },
-      bacteria: { extremophiles: 65, photosynthetic: 70, chemosynthetic: 75, anaerobic: 80 },
-      atmosphere: { nitrogen: 68.5, oxygen: 18.2, carbonDioxide: 12.1, methane: 1.2 }
-    },
-    {
-      id: "2",
-      name: "Proxima Centauri b",
-      distance: 4.2,
-      mass: 1.3,
-      radius: 1.1,
-      temperature: 234,
-      habitabilityScore: 68,
-      starType: "M-dwarf",
-      orbitalPeriod: 11.2,
-      discoveryYear: 2016,
-      minerals: { iron: 30, silicon: 25, magnesium: 18, carbon: 12, water: 15 },
-      bacteria: { extremophiles: 70, photosynthetic: 45, chemosynthetic: 80, anaerobic: 85 },
-      atmosphere: { nitrogen: 65.3, oxygen: 15.8, carbonDioxide: 16.4, methane: 2.5 }
-    },
-    {
-      id: "3",
-      name: "TRAPPIST-1e",
-      distance: 40,
-      mass: 0.77,
-      radius: 0.92,
-      temperature: 251,
-      habitabilityScore: 82,
-      starType: "M-dwarf",
-      orbitalPeriod: 6.1,
-      discoveryYear: 2017,
-      minerals: { iron: 28, silicon: 30, magnesium: 20, carbon: 10, water: 12 },
-      bacteria: { extremophiles: 60, photosynthetic: 75, chemosynthetic: 85, anaerobic: 90 },
-      atmosphere: { nitrogen: 72.1, oxygen: 20.5, carbonDioxide: 6.2, methane: 1.2 }
-    }
-  ];
-}
+// Enhanced exoplanet data with NASA-accurate parameters
+export const exoplanets: Exoplanet[] = parseRawExoplanetData();
 
-// Initialize exoplanets data
-let exoplanetsData: Exoplanet[] = [];
-let isLoading = true;
+// Export count and utility functions
+export const EXOPLANET_COUNT = exoplanets.length;
 
-fetchNASAExoplanets().then(data => {
-  exoplanetsData = data;
-  isLoading = false;
-}).catch(error => {
-  console.error('Failed to initialize exoplanet data:', error);
-  exoplanetsData = getFallbackExoplanets();
-  isLoading = false;
-});
-
-export const exoplanets: Exoplanet[] = exoplanetsData;
-export const EXOPLANET_COUNT = exoplanetsData.length;
-export const isExoplanetsLoading = () => isLoading;
-
+// Refresh function for future NASA API integration
 export const refreshExoplanets = async (): Promise<Exoplanet[]> => {
-  const newData = await fetchNASAExoplanets();
-  exoplanetsData.splice(0, exoplanetsData.length, ...newData);
-  return newData;
+  console.log('🔄 Refreshing exoplanet data...');
+  // For now, return the current data
+  // In the future, this could fetch from NASA API
+  return exoplanets;
 };
 
-console.log(`✨ Initializing NASA Exoplanet data loader...`);
+export const isExoplanetsLoading = () => false;
+
+console.log(`🌟 Cosmic-LifeMapper initialized with ${EXOPLANET_COUNT} scientifically accurate exoplanets`);

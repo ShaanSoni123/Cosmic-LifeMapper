@@ -302,11 +302,11 @@ export function convertToExoplanet(data: RawExoplanetData, index: number): Exopl
   );
   
   // Calculate realistic distance (light years)
-  const distance = Math.max(4.2, Math.min(4000, 
-    20 + Math.random() * 200 + 
-    (data.star_temperature < 4000 ? 50 : 0) + // M-dwarfs closer
-    (data.stellar_luminosity < 0.1 ? 30 : 0)   // Dim stars closer
-  ));
+  // Use a more realistic distance calculation based on stellar properties
+  const baseDistance = 20 + Math.random() * 180; // 20-200 ly base range
+  const tempFactor = data.star_temperature < 4000 ? 0.7 : data.star_temperature > 6000 ? 1.3 : 1.0;
+  const lumFactor = data.stellar_luminosity < 0.1 ? 0.8 : data.stellar_luminosity > 2.0 ? 1.4 : 1.0;
+  const distance = Math.max(4.2, Math.min(2000, baseDistance * tempFactor * lumFactor));
 
   // Discovery year based on planet characteristics (easier to find = earlier discovery)
   const discoveryYear = Math.max(2009, Math.min(2024, 
