@@ -1,74 +1,98 @@
-import { Exoplanet } from '../types/exoplanet';
-import { csvDataLoader } from '../services/csvDataLoader';
+import React, { useState } from 'react';
+import { Dashboard } from './components/Dashboard';
+import { ExoplanetDetail } from './components/ExoplanetDetail';
+import { ComparisonTool } from './components/ComparisonTool';
+import { exoplanets as allExoplanets, getAllExoplanets } from './data/exoplanets';
+import { Exoplanet } from './types/exoplanet';
 
-// Initialize with empty arrays to prevent blocking
-let allExoplanets: Exoplanet[] = [];
-let isLoading = false;
-let isLoaded = false;
+type View = 'dashboard' | 'detail' | 'compare';
 
-// Load CSV data asynchronously without blocking initial render
-async function initializeCSVData() {
-  if (isLoaded || isLoading) return allExoplanets;
-  
-  isLoading = true;
-  try {
-    console.log('🔄 Loading NASA CSV exoplanet data...');
-    const csvExoplanets = await csvDataLoader.loadAllExoplanets();
-    allExoplanets = csvExoplanets;
-    isLoaded = true;
-    console.log(`✅ Successfully loaded ${allExoplanets.length} exoplanets from NASA CSV`);
-  } catch (error) {
-    console.error('❌ Failed to load CSV data:', error);
-    allExoplanets = [];
-  } finally {
-    isLoading = false;
+function App() {
+  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [selectedExoplanetId, setSelectedExoplanetId] = useState<string | null>(null);
+  const [userAddedExoplanets, setUserAddedExoplanets] = useState<Exoplanet[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Combine static and dynamic exoplanets
+  const combinedExoplanets = React.useMemo(() => {
+    return [...getAllExoplanets(), ...userAddedExoplanets];
+  }, [userAddedExoplanets]);
+
+  const selectedExoplanet = selectedExoplanetId 
+    ? combinedExoplanets.find(p => p.id === selectedExoplanetId) 
+    : null;
+
+  const handleExoplanetSelect = (id: string) => {
+    setSelectedExoplanetId(id);
+    setCurrentView('detail');
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+    setSelectedExoplanetId(null);
+  };
+
+  const handleCompareClick = () => {
+    setCurrentView('compare');
+  };
+
+  const handleAddNASAPlanet = (planetData: Exoplanet) => {
+    // Check if planet already exists
+    const exists = combinedExoplanets.some(p => p.name === planetData.name);
+    if (!exists) {
+      setUserAddedExoplanets(prev => [...prev, planetData]);
+      console.log(`✅ Added ${planetData.name} to your collection`);
+    } else {
+      console.log(`⚠️ ${planetData.name} already exists in your collection`);
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingScreen />;
   }
-  
-  return allExoplanets;
+
+  if (currentView === 'detail' && selectedExoplanet) {
+    return (
+      <ExoplanetDetail 
+        exoplanet={selectedExoplanet} 
+        onBack={handleBackToDashboard}
+      />
+    );
+  }
+
+  if (currentView === 'compare') {
+    return (
+      <ComparisonTool 
+        onBack={handleBackToDashboard}
+        allExoplanets={combinedExoplanets}
+      />
+    );
+  }
+
+  return (
+    <Dashboard 
+      onExoplanetSelect={handleExoplanetSelect}
+      onCompareClick={handleCompareClick}
+      onAddNASAPlanet={handleAddNASAPlanet}
+      userAddedExoplanets={userAddedExoplanets}
+      allExoplanets={combinedExoplanets}
+    />
+  );
 }
 
-// Start loading data immediately but don't block
-initializeCSVData();
+const LoadingScreen: React.FC = () => (
+  <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="text-white text-center">
+      <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <h1 className="text-2xl mb-4">Loading Cosmic-LifeMapper...</h1>
+      <p className="text-gray-400">Initializing exoplanet data...</p>
+      <div className="mt-4 flex justify-center space-x-2">
+        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+      </div>
+    </div>
+  </div>
+);
 
-// Export current state
-export let exoplanets: Exoplanet[] = allExoplanets;
-export let EXOPLANET_COUNT = allExoplanets.length;
-export let LOCAL_EXOPLANET_COUNT = 0; // No local data anymore
-export let NASA_EXOPLANET_COUNT = allExoplanets.length;
-
-// Refresh function to reload CSV data
-export const refreshExoplanets = async (): Promise<void> => {
-  console.log('🔄 Refreshing NASA CSV exoplanet data...');
-  isLoaded = false;
-  const refreshedData = await initializeCSVData();
-  exoplanets = refreshedData;
-  EXOPLANET_COUNT = refreshedData.length;
-  NASA_EXOPLANET_COUNT = refreshedData.length;
-};
-
-// Get all exoplanets (now all from CSV)
-export const getAllExoplanets = async (): Promise<Exoplanet[]> => {
-  if (!isLoaded && !isLoading) {
-    await initializeCSVData();
-  }
-  return allExoplanets;
-};
-
-// Get exoplanets synchronously (may be empty initially)
-export const getAllExoplanetsSync = (): Exoplanet[] => allExoplanets;
-
-// Check if data is loading
-export const isExoplanetsLoading = () => isLoading;
-
-// Get NASA exoplanets (all data is now NASA data)
-export const getNASAExoplanets = () => allExoplanets;
-export const getLocalExoplanets = () => []; // No local data anymore
-
-console.log(`🌟 Cosmic-LifeMapper initializing with NASA CSV data...`);
-console.log(`📊 Loading ${allExoplanets.length} exoplanets from NASA archive`);
-
-// Update exports when data loads
-initializeCSVData().then(() => {
-  exoplanets = allExoplanets;
-}
-)
+export default App;
