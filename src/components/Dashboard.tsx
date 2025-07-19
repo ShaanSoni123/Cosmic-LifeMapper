@@ -70,3 +70,5 @@ console.log(`📊 Loading ${allExoplanets.length} exoplanets from NASA archive`)
 // Update exports when data loads
 initializeCSVData().then(() => {
   exoplanets = allExoplanets;
+}
+)
