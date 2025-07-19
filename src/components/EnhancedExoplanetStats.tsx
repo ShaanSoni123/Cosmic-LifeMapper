@@ -75,10 +75,10 @@ export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
       <StatsCard
         title="NASA Archive"
         value={nasaExoplanets.toLocaleString()}
-        subtitle="Real NASA discoveries"
+        subtitle="Real NASA CSV data"
         icon={Database}
         color="purple"
-        trend="Real-time sync"
+        trend="Accurate data"
       />
       
       {userAddedExoplanets > 0 && (
@@ -111,7 +111,7 @@ export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
       <StatsCard
         title="Latest Discovery"
         value={latestDiscovery}
-        subtitle="Most recent confirmed planet"
+        subtitle="Most recent in dataset"
         icon={Calendar}
         color="blue"
       />

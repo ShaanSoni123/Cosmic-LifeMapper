@@ -36,6 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showNASADataViewer, setShowNASADataViewer] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   // Use provided exoplanets or get all available exoplanets
   const displayExoplanets = React.useMemo(() => {
@@ -75,15 +76,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleRefreshData = async () => {
     setIsRefreshing(true);
+    setIsLoadingData(true);
     try {
       await refreshExoplanets();
-      console.log('✅ Successfully refreshed exoplanet data from NASA');
+      console.log('✅ Successfully refreshed real NASA CSV data');
     } catch (error) {
-      console.error('❌ Failed to refresh exoplanet data:', error);
+      console.error('❌ Failed to refresh NASA CSV data:', error);
     } finally {
       setIsRefreshing(false);
+      setIsLoadingData(false);
     }
   };
+
+  // Check if data is still loading
+  React.useEffect(() => {
+    const checkDataLoading = () => {
+      if (displayExoplanets.length > 0) {
+        setIsLoadingData(false);
+      }
+    };
+    
+    const interval = setInterval(checkDataLoading, 1000);
+    return () => clearInterval(interval);
+  }, [displayExoplanets.length]);
+
+  // Show loading screen while data is loading
+  if (isLoadingData && displayExoplanets.length === 0) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h1 className="text-2xl mb-4">Loading Real NASA Data...</h1>
+          <p className="text-gray-400">Loading 1000+ accurate exoplanets from NASA CSV</p>
+          <div className="mt-4 flex justify-center space-x-2">
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -176,11 +209,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
               Embark on a voyage across the cosmos to uncover a universe of scientifically explored exoplanets. 
               Dive into their enigmatic compositions, evaluate their potential to host life, and compare the distinct celestial imprints they leave behind.
-              {nasaCount > 0 && (
-                <span className="block mt-2 text-purple-300 font-medium">
-                  Including {nasaCount} real exoplanets from NASA's archive!
-                </span>
-              )}
+              <span className="block mt-2 text-green-300 font-medium">
+                Featuring {totalCount} real exoplanets from NASA's official archive with accurate data!
+              </span>
             </p>
           </div>
 
@@ -252,10 +283,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 onClick={handleRefreshData}
                 disabled={isRefreshing}
-                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 hover:from-orange-500 hover:via-red-500 hover:to-pink-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-orange-500/30 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-green-500/30 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-4 md:w-5 h-4 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span>{isRefreshing ? 'Refreshing...' : 'Refresh NASA Data'}</span>
+                <span>{isRefreshing ? 'Refreshing...' : 'Refresh Real Data'}</span>
               </button>
             </div>
           </div>
@@ -266,7 +297,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
                 <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                  Explore {totalCount} Cosmic Worlds
+                  Explore {totalCount} Real NASA Exoplanets
                 </h2>
               </div>
               

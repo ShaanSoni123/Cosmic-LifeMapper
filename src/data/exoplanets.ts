@@ -1,93 +1,67 @@
 import { Exoplanet } from '../types/exoplanet';
-import { RAW_EXOPLANET_DATA } from './rawExoplanetData';
-import { convertToExoplanet, RawExoplanetData } from '../utils/exoplanetProcessor';
+import { csvDataLoader } from '../services/csvDataLoader';
 
-// Initialize NASA data synchronously to avoid loading issues
-let nasaExoplanets: Exoplanet[] = [];
+// Real NASA CSV data
+let realNASAExoplanets: Exoplanet[] = [];
 let NASA_EXOPLANET_COUNT = 0;
+let isLoadingNASAData = false;
 
-// Load NASA data asynchronously but don't block initial render
-async function initializeNASAData() {
+// Load real NASA CSV data
+async function loadRealNASAData() {
+  if (isLoadingNASAData) return;
+  isLoadingNASAData = true;
+  
   try {
-    const { loadNASAExoplanets } = await import('./nasaExoplanets');
-    nasaExoplanets = await loadNASAExoplanets();
-    NASA_EXOPLANET_COUNT = nasaExoplanets.length;
-    console.log(`✅ NASA data loaded: ${NASA_EXOPLANET_COUNT} exoplanets`);
+    console.log('🔄 Loading real NASA CSV data...');
+    const csvData = await csvDataLoader.loadNASACSV();
+    
+    realNASAExoplanets = csvData.map((nasaData, index) => 
+      csvDataLoader.convertToExoplanet(nasaData, index)
+    );
+    
+    NASA_EXOPLANET_COUNT = realNASAExoplanets.length;
+    console.log(`✅ Successfully loaded ${NASA_EXOPLANET_COUNT} real NASA exoplanets from CSV`);
+    
   } catch (error) {
-    console.warn('⚠️ Failed to load NASA data, continuing with local data only:', error);
-    nasaExoplanets = [];
+    console.error('❌ Failed to load real NASA CSV data:', error);
+    realNASAExoplanets = [];
     NASA_EXOPLANET_COUNT = 0;
+  } finally {
+    isLoadingNASAData = false;
   }
 }
 
-// Start loading NASA data but don't wait for it
-initializeNASAData();
+// Start loading real NASA data immediately
+loadRealNASAData();
 
-// Parse the raw CSV data and convert to exoplanets
-function parseRawExoplanetData(): Exoplanet[] {
-  const lines = RAW_EXOPLANET_DATA.trim().split('\n');
-  const headers = lines[0].split(',');
-  const exoplanets: Exoplanet[] = [];
+// Start with empty array, will be populated with real NASA data
+export let exoplanets: Exoplanet[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',');
-    if (values.length !== headers.length) continue;
-
-    const rawData: RawExoplanetData = {
-      planet_name: values[0],
-      planet_radius: parseFloat(values[1]),
-      star_temperature: parseFloat(values[2]),
-      orbital_distance: parseFloat(values[3]),
-      atmospheric_pressure: parseFloat(values[4]),
-      stellar_luminosity: parseFloat(values[5]),
-      planet_mass: parseFloat(values[6]),
-      eccentricity: parseFloat(values[7]),
-      orbital_period: parseFloat(values[8]),
-      albedo: parseFloat(values[9]),
-      host_star_metallicity: parseFloat(values[10]),
-      host_star_age: parseFloat(values[11])
-    };
-
-    // Convert to frontend format with enhanced calculations
-    const exoplanet = convertToExoplanet(rawData, i - 1);
-    exoplanets.push(exoplanet);
-  }
-
-  console.log(`✅ Successfully loaded ${exoplanets.length} exoplanets with accurate scientific data`);
-  return exoplanets;
-}
-
-// Enhanced exoplanet data with NASA-accurate parameters
-const localExoplanets = parseRawExoplanetData();
-
-// Start with local exoplanets only, NASA data will be added when available
-export let exoplanets: Exoplanet[] = [...localExoplanets];
-
-// Export count and utility functions
+// Export counts and utility functions
 export let EXOPLANET_COUNT = exoplanets.length;
-export let LOCAL_EXOPLANET_COUNT = localExoplanets.length;
+export let LOCAL_EXOPLANET_COUNT = 0; // No local data anymore, all from NASA
 export { NASA_EXOPLANET_COUNT };
 
-// Update exoplanets array when NASA data is loaded
-initializeNASAData().then(() => {
-  exoplanets = [...localExoplanets, ...nasaExoplanets];
+// Update exoplanets array when real NASA data is loaded
+loadRealNASAData().then(() => {
+  exoplanets = [...realNASAExoplanets];
   EXOPLANET_COUNT = exoplanets.length;
 });
 
 // Refresh function for future NASA API integration
 export const refreshExoplanets = async (): Promise<void> => {
-  console.log('🔄 Refreshing exoplanet data...');
-  await initializeNASAData();
-  exoplanets = [...localExoplanets, ...nasaExoplanets];
+  console.log('🔄 Refreshing real NASA exoplanet data...');
+  await loadRealNASAData();
+  exoplanets = [...realNASAExoplanets];
   EXOPLANET_COUNT = exoplanets.length;
 };
 
 // Get exoplanets by source
-export const getLocalExoplanets = () => localExoplanets;
-export const getNASAExoplanets = () => nasaExoplanets;
-export const getAllExoplanets = () => [...localExoplanets, ...nasaExoplanets];
+export const getLocalExoplanets = () => []; // No local data anymore
+export const getNASAExoplanets = () => realNASAExoplanets;
+export const getAllExoplanets = () => [...realNASAExoplanets];
 
-export const isExoplanetsLoading = () => false;
+export const isExoplanetsLoading = () => isLoadingNASAData;
 
-console.log(`🌟 Cosmic-LifeMapper initialized with ${LOCAL_EXOPLANET_COUNT} local exoplanets`);
-console.log(`📊 NASA data loading in background...`);
+console.log(`🌟 Cosmic-LifeMapper initializing with real NASA CSV data...`);
+console.log(`📊 Loading ${NASA_EXOPLANET_COUNT || '1000+'} real NASA exoplanets...`);
