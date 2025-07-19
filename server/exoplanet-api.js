@@ -16,7 +16,7 @@ app.use(express.json());
 
 // List of 63 planets from the current dataset
 const PLANET_NAMES = [
-  'Kepler-22b', 'Proxima Centauri b', 'TRAPPIST-1e', 'Gliese 667 Cc', 'HD 40307g',
+  'Kepler-22 b', 'Proxima Centauri b', 'TRAPPIST-1e', 'Gliese 667 Cc', 'HD 40307g',
   'Kepler-186f', 'LHS 1140b', 'Wolf 1061c', 'Kepler-62f', 'Tau Ceti e',
   'GJ 667 C f', 'Kepler-452b', 'K2-18b', 'Kepler-438b', 'Kepler-440b',
   'Ross 128b', 'Kepler-62e', 'HD 219134b', 'Kepler-10c', 'GJ 273b',
