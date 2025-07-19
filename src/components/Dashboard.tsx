@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  exoplanets as allExoplanets, 
   EXOPLANET_COUNT, 
   LOCAL_EXOPLANET_COUNT,
   NASA_EXOPLANET_COUNT,
-  getLocalExoplanets,
-  getNASAExoplanets,
+  getAllExoplanets,
   refreshExoplanets 
 } from '../data/exoplanets';
 import { ExoplanetCard } from './ExoplanetCard';
@@ -39,8 +37,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showNASADataViewer, setShowNASADataViewer] = useState(false);
 
-  // Combine static and dynamic exoplanets
-  const displayExoplanets = providedExoplanets || [...allExoplanets, ...userAddedExoplanets];
+  // Use provided exoplanets or get all available exoplanets
+  const displayExoplanets = React.useMemo(() => {
+    if (providedExoplanets) return providedExoplanets;
+    return [...getAllExoplanets(), ...userAddedExoplanets];
+  }, [providedExoplanets, userAddedExoplanets]);
+
   const totalCount = displayExoplanets.length;
   const localCount = LOCAL_EXOPLANET_COUNT;
   const nasaCount = NASA_EXOPLANET_COUNT;

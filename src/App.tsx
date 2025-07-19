@@ -2,20 +2,21 @@ import React, { useState } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { ExoplanetDetail } from './components/ExoplanetDetail';
 import { ComparisonTool } from './components/ComparisonTool';
-import { exoplanets as allExoplanets, getLocalExoplanets, getNASAExoplanets } from './data/exoplanets';
+import { exoplanets as allExoplanets, getAllExoplanets } from './data/exoplanets';
 import { Exoplanet } from './types/exoplanet';
 
 type View = 'dashboard' | 'detail' | 'compare';
 
 function App() {
-  // Add error boundary
-  try {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedExoplanetId, setSelectedExoplanetId] = useState<string | null>(null);
   const [userAddedExoplanets, setUserAddedExoplanets] = useState<Exoplanet[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Combine static and dynamic exoplanets
-  const combinedExoplanets = [...allExoplanets, ...userAddedExoplanets];
+  const combinedExoplanets = React.useMemo(() => {
+    return [...getAllExoplanets(), ...userAddedExoplanets];
+  }, [userAddedExoplanets]);
 
   const selectedExoplanet = selectedExoplanetId 
     ? combinedExoplanets.find(p => p.id === selectedExoplanetId) 
@@ -45,6 +46,11 @@ function App() {
       console.log(`⚠️ ${planetData.name} already exists in your collection`);
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   if (currentView === 'detail' && selectedExoplanet) {
     return (
       <ExoplanetDetail 
@@ -72,17 +78,21 @@ function App() {
       allExoplanets={combinedExoplanets}
     />
   );
-  } catch (error) {
-    console.error('App error:', error);
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <h1 className="text-2xl mb-4">Loading Cosmic-LifeMapper...</h1>
-          <p className="text-gray-400">Initializing exoplanet data...</p>
-        </div>
-      </div>
-    );
-  }
 }
+
+const LoadingScreen: React.FC = () => (
+  <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="text-white text-center">
+      <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <h1 className="text-2xl mb-4">Loading Cosmic-LifeMapper...</h1>
+      <p className="text-gray-400">Initializing exoplanet data...</p>
+      <div className="mt-4 flex justify-center space-x-2">
+        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+      </div>
+    </div>
+  </div>
+);
 
 export default App;

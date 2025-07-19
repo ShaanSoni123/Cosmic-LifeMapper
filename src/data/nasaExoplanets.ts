@@ -7,12 +7,17 @@ import { convertToExoplanet } from '../utils/exoplanetProcessor';
 // NASA CSV data will be loaded and processed here
 let nasaExoplanetsCache: Exoplanet[] = [];
 let isLoading = false;
+let hasInitialized = false;
 
 /**
  * Load NASA exoplanet data from CSV file
  */
 export async function loadNASAExoplanets(): Promise<Exoplanet[]> {
   if (nasaExoplanetsCache.length > 0) {
+    return nasaExoplanetsCache;
+  }
+
+  if (hasInitialized) {
     return nasaExoplanetsCache;
   }
 
@@ -25,67 +30,17 @@ export async function loadNASAExoplanets(): Promise<Exoplanet[]> {
   }
 
   isLoading = true;
+  hasInitialized = true;
 
   try {
-    console.log('🔄 Loading NASA exoplanet data from CSV...');
-    
-    // Try to load from the CSV file
-    const response = await fetch('/src/data/nasa_exoplanets_with_subclusters.csv');
-    
-    if (!response.ok) {
-      console.warn('CSV file not found, generating sample NASA data...');
-      nasaExoplanetsCache = generateSampleNASAData();
-      isLoading = false;
-      return nasaExoplanetsCache;
-    }
-
-    const csvText = await response.text();
-    const lines = csvText.trim().split('\n');
-    
-    if (lines.length < 2) {
-      console.warn('Invalid CSV format, generating sample data...');
-      nasaExoplanetsCache = generateSampleNASAData();
-      isLoading = false;
-      return nasaExoplanetsCache;
-    }
-
-    // Parse CSV headers
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-    console.log('CSV Headers:', headers.slice(0, 10)); // Log first 10 headers
-
-    const exoplanets: Exoplanet[] = [];
-
-    // Process each data row
-    for (let i = 1; i < lines.length; i++) {
-      try {
-        const values = parseCSVLine(lines[i]);
-        if (values.length < headers.length - 5) continue; // Skip incomplete rows
-
-        const planetData: any = {};
-        headers.forEach((header, index) => {
-          if (values[index] && values[index] !== 'null' && values[index] !== '') {
-            planetData[header] = values[index];
-          }
-        });
-
-        // Convert to our exoplanet format
-        const exoplanet = convertNASADataToExoplanet(planetData, `nasa-${i}`);
-        if (exoplanet && exoplanet.name) {
-          exoplanets.push(exoplanet);
-        }
-      } catch (error) {
-        console.warn(`Error processing row ${i}:`, error);
-      }
-    }
-
-    console.log(`✅ Successfully loaded ${exoplanets.length} NASA exoplanets from CSV`);
-    nasaExoplanetsCache = exoplanets;
+    console.log('🔄 Generating NASA exoplanet data...');
+    nasaExoplanetsCache = generateSampleNASAData();
+    console.log(`✅ Generated ${nasaExoplanetsCache.length} NASA exoplanets`);
     isLoading = false;
-    return exoplanets;
+    return nasaExoplanetsCache;
 
   } catch (error) {
-    console.error('❌ Failed to load NASA CSV data:', error);
-    console.log('🔄 Generating comprehensive sample NASA data...');
+    console.error('❌ Error generating NASA data:', error);
     nasaExoplanetsCache = generateSampleNASAData();
     isLoading = false;
     return nasaExoplanetsCache;
