@@ -1,11 +1,12 @@
+// data/exoplanets.ts
 import { Exoplanet } from '../types/exoplanet';
 
 // Fetch live exoplanet data from NASA API
 async function fetchNASAExoplanets(): Promise<Exoplanet[]> {
   try {
     console.log('🚀 Fetching live exoplanet data from NASA API...');
-    
-    const response = await fetch('http://localhost:3001/api/exoplanets', {
+
+    const response = await fetch('http://localhost:3002/exoplanets', {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -18,21 +19,18 @@ async function fetchNASAExoplanets(): Promise<Exoplanet[]> {
     }
 
     const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to fetch exoplanet data');
+
+    if (!Array.isArray(data)) {
+      throw new Error('NASA API did not return an array');
     }
 
-    console.log(`✅ Successfully loaded ${data.count} exoplanets from NASA API`);
-    console.log(`📊 Real NASA data: ${data.realDataCount}/${data.count} planets`);
-    
-    return data.exoplanets;
-    
+    console.log(`✅ Successfully loaded ${data.length} exoplanets from NASA API`);
+    return data;
+
   } catch (error) {
     console.error('❌ Failed to fetch NASA data:', error);
     console.log('🔄 Falling back to static data...');
-    
-    // Return fallback static data if API fails
+
     return getFallbackExoplanets();
   }
 }
@@ -56,7 +54,7 @@ function getFallbackExoplanets(): Exoplanet[] {
       atmosphere: { nitrogen: 68.5, oxygen: 18.2, carbonDioxide: 12.1, methane: 1.2 }
     },
     {
-      id: "2", 
+      id: "2",
       name: "Proxima Centauri b",
       distance: 4.2,
       mass: 1.3,
@@ -72,7 +70,7 @@ function getFallbackExoplanets(): Exoplanet[] {
     },
     {
       id: "3",
-      name: "TRAPPIST-1e", 
+      name: "TRAPPIST-1e",
       distance: 40,
       mass: 0.77,
       radius: 0.92,
@@ -85,7 +83,6 @@ function getFallbackExoplanets(): Exoplanet[] {
       bacteria: { extremophiles: 60, photosynthetic: 75, chemosynthetic: 85, anaerobic: 90 },
       atmosphere: { nitrogen: 72.1, oxygen: 20.5, carbonDioxide: 6.2, methane: 1.2 }
     }
-    // Add more fallback planets as needed...
   ];
 }
 
@@ -93,7 +90,6 @@ function getFallbackExoplanets(): Exoplanet[] {
 let exoplanetsData: Exoplanet[] = [];
 let isLoading = true;
 
-// Load data immediately
 fetchNASAExoplanets().then(data => {
   exoplanetsData = data;
   isLoading = false;
@@ -103,16 +99,10 @@ fetchNASAExoplanets().then(data => {
   isLoading = false;
 });
 
-// Export exoplanets data
 export const exoplanets: Exoplanet[] = exoplanetsData;
-
-// Export count for verification
 export const EXOPLANET_COUNT = exoplanetsData.length;
-
-// Export loading state
 export const isExoplanetsLoading = () => isLoading;
 
-// Export refresh function
 export const refreshExoplanets = async (): Promise<Exoplanet[]> => {
   const newData = await fetchNASAExoplanets();
   exoplanetsData.splice(0, exoplanetsData.length, ...newData);
