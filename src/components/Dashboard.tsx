@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { exoplanets as staticExoplanets, EXOPLANET_COUNT } from '../data/exoplanets';
+import { exoplanets as staticExoplanets, EXOPLANET_COUNT, refreshExoplanets } from '../data/exoplanets';
 import { ExoplanetCard } from './ExoplanetCard';
-import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database, Users } from 'lucide-react';
+import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database, Users, RefreshCw } from 'lucide-react';
 import { NASASearchModal } from './NASASearchModal';
 import { Exoplanet } from '../types/exoplanet';
 import { TeamSection } from './TeamSection';
@@ -24,6 +24,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showOnlyHabitable, setShowOnlyHabitable] = useState(false);
   const [showNASAModal, setShowNASAModal] = useState(false);
   const [showTeamModal, setShowTeamModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Combine static and dynamic exoplanets
   const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
@@ -48,6 +49,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
     });
 
   const habitablePlanetsCount = allExoplanets.filter(p => p.habitabilityScore >= 70).length;
+
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshExoplanets();
+      console.log('✅ Successfully refreshed exoplanet data from NASA');
+    } catch (error) {
+      console.error('❌ Failed to refresh exoplanet data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -193,6 +206,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <Users className="w-4 md:w-5 h-4 md:h-5" />
                 <span>Meet Our Team</span>
+              </button>
+              
+              <button
+                onClick={handleRefreshData}
+                disabled={isRefreshing}
+                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 hover:from-orange-500 hover:via-red-500 hover:to-pink-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-orange-500/30 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={`w-4 md:w-5 h-4 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>{isRefreshing ? 'Refreshing...' : 'Refresh NASA Data'}</span>
               </button>
             </div>
           </div>
