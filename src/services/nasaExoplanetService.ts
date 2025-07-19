@@ -53,7 +53,7 @@ class NASAExoplanetService {
         AND pl_rade IS NOT NULL 
         AND pl_bmasse IS NOT NULL
       ORDER BY pl_name
-      LIMIT 2000
+      LIMIT 1000
     `.trim();
     
     console.log('🔍 Loading planet names from NASA Archive with API key...');

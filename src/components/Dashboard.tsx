@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { exoplanets as staticExoplanets, EXOPLANET_COUNT, refreshExoplanets } from '../data/exoplanets';
 import { ExoplanetCard } from './ExoplanetCard';
-import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database, Users, RefreshCw } from 'lucide-react';
+import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database, Users, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { NASASearchModal } from './NASASearchModal';
 import { Exoplanet } from '../types/exoplanet';
 import { TeamSection } from './TeamSection';
+import { NASADataViewer } from './NASADataViewer';
+import { EnhancedExoplanetStats } from './EnhancedExoplanetStats';
 
 interface DashboardProps {
   onExoplanetSelect: (id: string) => void;
@@ -25,6 +27,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showNASAModal, setShowNASAModal] = useState(false);
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showNASADataViewer, setShowNASADataViewer] = useState(false);
 
   // Combine static and dynamic exoplanets
   const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
@@ -49,6 +52,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     });
 
   const habitablePlanetsCount = allExoplanets.filter(p => p.habitabilityScore >= 70).length;
+
+  // Calculate enhanced statistics
+  const discoveryMethods = [...new Set(allExoplanets.map(p => p.starType))].length;
+  const latestDiscovery = Math.max(...allExoplanets.map(p => p.discoveryYear)).toString();
+  const averageDistance = Math.round(allExoplanets.reduce((sum, p) => sum + p.distance, 0) / allExoplanets.length);
+  const nasaExoplanetsCount = dynamicExoplanets.length;
 
   const handleRefreshData = async () => {
     setIsRefreshing(true);
@@ -179,7 +188,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
 
-          {/* Team Section */}
+          {/* Enhanced Statistics */}
+          <EnhancedExoplanetStats
+            totalExoplanets={totalCount}
+            nasaExoplanets={nasaExoplanetsCount}
+            habitablePlanets={habitablePlanetsCount}
+            discoveryMethods={discoveryMethods}
+            latestDiscovery={latestDiscovery}
+            averageDistance={averageDistance}
+          />
 
           {/* Search and Controls */}
           <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
@@ -198,6 +215,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <Database className="w-4 md:w-5 h-4 md:h-5" />
                 <span>NASA Exoplanets</span>
+              </button>
+              
+              <button
+                onClick={() => setShowNASADataViewer(true)}
+                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-indigo-500/30 text-sm md:text-base"
+              >
+                <FileSpreadsheet className="w-4 md:w-5 h-4 md:h-5" />
+                <span>NASA Data Archive</span>
               </button>
               
               <button
@@ -300,6 +325,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <NASASearchModal
             isOpen={showNASAModal}
             onClose={() => setShowNASAModal(false)}
+            onPlanetSelect={(planetData) => {
+              if (onAddNASAPlanet) {
+                onAddNASAPlanet(planetData);
+              }
+            }}
+          />
+
+          {/* NASA Data Viewer */}
+          <NASADataViewer
+            isOpen={showNASADataViewer}
+            onClose={() => setShowNASADataViewer(false)}
             onPlanetSelect={(planetData) => {
               if (onAddNASAPlanet) {
                 onAddNASAPlanet(planetData);
