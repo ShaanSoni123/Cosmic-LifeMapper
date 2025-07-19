@@ -32,6 +32,8 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, value, subtitle, icon: Ico
 interface EnhancedExoplanetStatsProps {
   totalExoplanets: number;
   nasaExoplanets: number;
+  localExoplanets: number;
+  userAddedExoplanets: number;
   habitablePlanets: number;
   discoveryMethods: number;
   latestDiscovery: string;
@@ -41,6 +43,8 @@ interface EnhancedExoplanetStatsProps {
 export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
   totalExoplanets,
   nasaExoplanets,
+  localExoplanets,
+  userAddedExoplanets,
   habitablePlanets,
   discoveryMethods,
   latestDiscovery,
@@ -61,13 +65,31 @@ export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
       />
       
       <StatsCard
-        title="NASA Archive Data"
+        title="Local Database"
+        value={localExoplanets.toLocaleString()}
+        subtitle="Curated exoplanet collection"
+        icon={Globe}
+        color="blue"
+      />
+      
+      <StatsCard
+        title="NASA Archive"
         value={nasaExoplanets.toLocaleString()}
-        subtitle={`${nasaPercentage}% from NASA database`}
+        subtitle="Real NASA discoveries"
         icon={Database}
         color="purple"
         trend="Real-time sync"
       />
+      
+      {userAddedExoplanets > 0 && (
+        <StatsCard
+          title="User Added"
+          value={userAddedExoplanets.toLocaleString()}
+          subtitle="Custom additions"
+          icon={Zap}
+          color="yellow"
+        />
+      )}
       
       <StatsCard
         title="Potentially Habitable"

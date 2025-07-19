@@ -22,10 +22,16 @@ interface ExoplanetData {
 interface NASADataViewerProps {
   isOpen: boolean;
   onClose: () => void;
+  allExoplanets?: any[];
   onPlanetSelect?: (planetData: any) => void;
 }
 
-export const NASADataViewer: React.FC<NASADataViewerProps> = ({ isOpen, onClose, onPlanetSelect }) => {
+export const NASADataViewer: React.FC<NASADataViewerProps> = ({ 
+  isOpen, 
+  onClose, 
+  allExoplanets = [],
+  onPlanetSelect 
+}) => {
   const [data, setData] = useState<ExoplanetData[]>([]);
   const [filteredData, setFilteredData] = useState<ExoplanetData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -158,6 +164,17 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({ isOpen, onClose,
 
   const handlePlanetSelect = (planet: ExoplanetData) => {
     if (onPlanetSelect) {
+      // Check if planet already exists
+      const exists = allExoplanets.some(p => p.name === planet.pl_name);
+      if (exists) {
+        toast({
+          title: "Planet Already Exists",
+          description: `${planet.pl_name} is already in your collection`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Convert NASA data to internal format
       const convertedPlanet = {
         id: `nasa-${Date.now()}`,
@@ -181,6 +198,10 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({ isOpen, onClose,
       };
       
       onPlanetSelect(convertedPlanet);
+      toast({
+        title: "Planet Added Successfully",
+        description: `${planet.pl_name} has been added to your collection`,
+      });
     }
   };
 

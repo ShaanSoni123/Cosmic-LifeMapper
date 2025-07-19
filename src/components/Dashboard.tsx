@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { exoplanets as staticExoplanets, EXOPLANET_COUNT, refreshExoplanets } from '../data/exoplanets';
+import { 
+  exoplanets as allExoplanets, 
+  EXOPLANET_COUNT, 
+  LOCAL_EXOPLANET_COUNT,
+  NASA_EXOPLANET_COUNT,
+  getLocalExoplanets,
+  getNASAExoplanets,
+  refreshExoplanets 
+} from '../data/exoplanets';
 import { ExoplanetCard } from './ExoplanetCard';
 import { Search, Filter, Rocket, BarChart3, Globe, Zap, Satellite, Database, Users, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { NASASearchModal } from './NASASearchModal';
@@ -12,14 +20,16 @@ interface DashboardProps {
   onExoplanetSelect: (id: string) => void;
   onCompareClick: () => void;
   onAddNASAPlanet?: (planetData: any) => void;
-  dynamicExoplanets?: Exoplanet[];
+  userAddedExoplanets?: Exoplanet[];
+  allExoplanets?: Exoplanet[];
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
   onExoplanetSelect, 
   onCompareClick, 
   onAddNASAPlanet,
-  dynamicExoplanets = []
+  userAddedExoplanets = [],
+  allExoplanets: providedExoplanets
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'habitability' | 'distance'>('habitability');
@@ -30,10 +40,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showNASADataViewer, setShowNASADataViewer] = useState(false);
 
   // Combine static and dynamic exoplanets
-  const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
-  const totalCount = allExoplanets.length;
+  const displayExoplanets = providedExoplanets || [...allExoplanets, ...userAddedExoplanets];
+  const totalCount = displayExoplanets.length;
+  const localCount = LOCAL_EXOPLANET_COUNT;
+  const nasaCount = NASA_EXOPLANET_COUNT;
+  const userAddedCount = userAddedExoplanets.length;
 
-  const filteredExoplanets = allExoplanets
+  const filteredExoplanets = displayExoplanets
     .filter(planet => 
       planet.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (!showOnlyHabitable || planet.habitabilityScore >= 70) // Only show planets with 70%+ habitability
@@ -51,13 +64,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }
     });
 
-  const habitablePlanetsCount = allExoplanets.filter(p => p.habitabilityScore >= 70).length;
+  const habitablePlanetsCount = displayExoplanets.filter(p => p.habitabilityScore >= 70).length;
 
   // Calculate enhanced statistics
-  const discoveryMethods = [...new Set(allExoplanets.map(p => p.starType))].length;
-  const latestDiscovery = Math.max(...allExoplanets.map(p => p.discoveryYear)).toString();
-  const averageDistance = Math.round(allExoplanets.reduce((sum, p) => sum + p.distance, 0) / allExoplanets.length);
-  const nasaExoplanetsCount = dynamicExoplanets.length;
+  const discoveryMethods = [...new Set(displayExoplanets.map(p => p.starType))].length;
+  const latestDiscovery = Math.max(...displayExoplanets.map(p => p.discoveryYear)).toString();
+  const averageDistance = Math.round(displayExoplanets.reduce((sum, p) => sum + p.distance, 0) / displayExoplanets.length);
 
   const handleRefreshData = async () => {
     setIsRefreshing(true);
@@ -162,9 +174,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
               Embark on a voyage across the cosmos to uncover a universe of scientifically explored exoplanets. 
               Dive into their enigmatic compositions, evaluate their potential to host life, and compare the distinct celestial imprints they leave behind.
-              {dynamicExoplanets.length > 0 && (
+              {nasaCount > 0 && (
                 <span className="block mt-2 text-purple-300 font-medium">
-                  Including {dynamicExoplanets.length} real exoplanets from NASA's archive!
+                  Including {nasaCount} real exoplanets from NASA's archive!
                 </span>
               )}
             </p>
@@ -191,7 +203,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Enhanced Statistics */}
           <EnhancedExoplanetStats
             totalExoplanets={totalCount}
-            nasaExoplanets={nasaExoplanetsCount}
+            nasaExoplanets={nasaCount}
+            localExoplanets={localCount}
+            userAddedExoplanets={userAddedCount}
             habitablePlanets={habitablePlanetsCount}
             discoveryMethods={discoveryMethods}
             latestDiscovery={latestDiscovery}
@@ -336,6 +350,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <NASADataViewer
             isOpen={showNASADataViewer}
             onClose={() => setShowNASADataViewer(false)}
+            allExoplanets={displayExoplanets}
             onPlanetSelect={(planetData) => {
               if (onAddNASAPlanet) {
                 onAddNASAPlanet(planetData);

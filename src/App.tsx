@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { ExoplanetDetail } from './components/ExoplanetDetail';
 import { ComparisonTool } from './components/ComparisonTool';
-import { exoplanets as staticExoplanets } from './data/exoplanets';
+import { exoplanets as allExoplanets, getLocalExoplanets, getNASAExoplanets } from './data/exoplanets';
 import { Exoplanet } from './types/exoplanet';
 
 type View = 'dashboard' | 'detail' | 'compare';
@@ -12,13 +12,13 @@ function App() {
   try {
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedExoplanetId, setSelectedExoplanetId] = useState<string | null>(null);
-  const [dynamicExoplanets, setDynamicExoplanets] = useState<Exoplanet[]>([]);
+  const [userAddedExoplanets, setUserAddedExoplanets] = useState<Exoplanet[]>([]);
 
   // Combine static and dynamic exoplanets
-  const allExoplanets = [...staticExoplanets, ...dynamicExoplanets];
+  const combinedExoplanets = [...allExoplanets, ...userAddedExoplanets];
 
   const selectedExoplanet = selectedExoplanetId 
-    ? allExoplanets.find(p => p.id === selectedExoplanetId) 
+    ? combinedExoplanets.find(p => p.id === selectedExoplanetId) 
     : null;
 
   const handleExoplanetSelect = (id: string) => {
@@ -36,7 +36,14 @@ function App() {
   };
 
   const handleAddNASAPlanet = (planetData: Exoplanet) => {
-    setDynamicExoplanets(prev => [...prev, planetData]);
+    // Check if planet already exists
+    const exists = combinedExoplanets.some(p => p.name === planetData.name);
+    if (!exists) {
+      setUserAddedExoplanets(prev => [...prev, planetData]);
+      console.log(`✅ Added ${planetData.name} to your collection`);
+    } else {
+      console.log(`⚠️ ${planetData.name} already exists in your collection`);
+    }
   };
   if (currentView === 'detail' && selectedExoplanet) {
     return (
@@ -51,7 +58,7 @@ function App() {
     return (
       <ComparisonTool 
         onBack={handleBackToDashboard}
-        allExoplanets={allExoplanets}
+        allExoplanets={combinedExoplanets}
       />
     );
   }
@@ -61,7 +68,8 @@ function App() {
       onExoplanetSelect={handleExoplanetSelect}
       onCompareClick={handleCompareClick}
       onAddNASAPlanet={handleAddNASAPlanet}
-      dynamicExoplanets={dynamicExoplanets}
+      userAddedExoplanets={userAddedExoplanets}
+      allExoplanets={combinedExoplanets}
     />
   );
   } catch (error) {

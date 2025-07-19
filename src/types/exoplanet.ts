@@ -33,4 +33,10 @@ export interface Exoplanet {
     classification: string;
     chemicalAnalysis: any;
   };
+  nasaData?: {
+    isRealNASAData: boolean;
+    originalData?: any;
+    lastUpdated: string;
+    dataSource: string;
+  };
 }

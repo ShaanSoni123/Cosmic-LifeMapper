@@ -1,6 +1,7 @@
 import { Exoplanet } from '../types/exoplanet';
 import { RAW_EXOPLANET_DATA } from './rawExoplanetData';
 import { convertToExoplanet, RawExoplanetData } from '../utils/exoplanetProcessor';
+import { nasaExoplanets, NASA_EXOPLANET_COUNT } from './nasaExoplanets';
 
 // Parse the raw CSV data and convert to exoplanets
 function parseRawExoplanetData(): Exoplanet[] {
@@ -37,10 +38,14 @@ function parseRawExoplanetData(): Exoplanet[] {
 }
 
 // Enhanced exoplanet data with NASA-accurate parameters
-export const exoplanets: Exoplanet[] = parseRawExoplanetData();
+const localExoplanets = parseRawExoplanetData();
 
+// Combine local and NASA exoplanets
+export const exoplanets: Exoplanet[] = [...localExoplanets, ...nasaExoplanets];
 // Export count and utility functions
 export const EXOPLANET_COUNT = exoplanets.length;
+export const LOCAL_EXOPLANET_COUNT = localExoplanets.length;
+export { NASA_EXOPLANET_COUNT };
 
 // Refresh function for future NASA API integration
 export const refreshExoplanets = async (): Promise<Exoplanet[]> => {
@@ -50,6 +55,12 @@ export const refreshExoplanets = async (): Promise<Exoplanet[]> => {
   return exoplanets;
 };
 
+// Get exoplanets by source
+export const getLocalExoplanets = () => localExoplanets;
+export const getNASAExoplanets = () => nasaExoplanets;
+export const getAllExoplanets = () => exoplanets;
+
 export const isExoplanetsLoading = () => false;
 
 console.log(`🌟 Cosmic-LifeMapper initialized with ${EXOPLANET_COUNT} scientifically accurate exoplanets`);
+console.log(`📊 Data sources: ${LOCAL_EXOPLANET_COUNT} local + ${NASA_EXOPLANET_COUNT} NASA exoplanets`);
