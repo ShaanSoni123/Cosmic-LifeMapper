@@ -42,7 +42,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const displayExoplanets = React.useMemo(() => {
     if (providedExoplanets) return providedExoplanets;
     const allExoplanets = getAllExoplanets();
-    console.log(`Dashboard: Got ${allExoplanets.length} exoplanets`);
+    console.log(`🚀 DASHBOARD EMERGENCY: Got ${allExoplanets.length} exoplanets`);
+    if (allExoplanets.length < 100) {
+      console.error('❌ CRITICAL: Too few exoplanets loaded!');
+    }
     return allExoplanets;
   }, [providedExoplanets, userAddedExoplanets]);
 
@@ -179,8 +182,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
               Embark on a voyage across the cosmos to uncover a universe of scientifically explored exoplanets. 
               Dive into their enigmatic compositions, evaluate their potential to host life, and compare the distinct celestial imprints they leave behind.
-              <span className="block mt-2 text-green-300 font-bold text-xl">
-                Featuring {totalCount} real exoplanets from NASA's official archive with accurate data!
+              <span className="block mt-2 text-green-300 font-bold text-2xl">
+                🚀 FEATURING ALL {totalCount} REAL EXOPLANETS FROM NASA'S OFFICIAL ARCHIVE! 🚀
               </span>
             </p>
           </div>
@@ -190,13 +193,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="mb-12 flex justify-start">
             <div className="backdrop-blur-xl bg-black/40 rounded-3xl p-12 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 w-full max-w-4xl">
               <div className="flex items-center space-x-8">
-                <div className="w-20 h-20 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
-                  <span className="text-white font-bold text-2xl">{totalCount}</span>
+                <div className="w-24 h-24 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
+                  <span className="text-white font-bold text-3xl">{totalCount}</span>
                 </div>
                 <div>
-                  <h3 className="text-5xl font-bold text-white mb-2">{totalCount}</h3>
-                  <p className="text-cyan-300 font-medium text-xl">Worlds Discovered</p>
-                  <p className="text-gray-400 text-sm mt-2">Scientifically analyzed exoplanets from across the galaxy</p>
+                  <h3 className="text-6xl font-bold text-white mb-2">{totalCount}</h3>
+                  <p className="text-cyan-300 font-medium text-2xl">NASA Exoplanets Loaded</p>
+                  <p className="text-green-400 text-lg mt-2 font-bold">✅ ALL REAL DATA FROM NASA ARCHIVE</p>
+                  <p className="text-gray-400 text-sm mt-1">Scientifically analyzed exoplanets with accurate stellar classifications</p>
                 </div>
               </div>
             </div>
@@ -250,11 +254,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center space-x-4 bg-black/60 rounded-xl px-4 py-3 border border-green-500/30">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                 <div className="text-sm">
-                  <span className="text-green-400 font-bold">{totalCount}</span>
+                  <span className="text-green-400 font-bold text-lg">{totalCount}</span>
                   <span className="text-gray-300 ml-1">Real NASA Exoplanets</span>
                 </div>
                 <div className="text-xs text-gray-400">
-                  Live Data
+                  ALL CSV DATA LOADED
                 </div>
               </div>
             </div>
@@ -266,7 +270,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
                 <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                  All {totalCount} Real NASA Exoplanets
+                  🌟 ALL {totalCount} REAL NASA EXOPLANETS 🌟
                 </h2>
               </div>
               

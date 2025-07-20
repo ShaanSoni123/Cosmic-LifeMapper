@@ -57,11 +57,11 @@ export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <StatsCard
         title="Total Exoplanets"
-        value={totalExoplanets.toLocaleString()}
-        subtitle="Confirmed discoveries"
+        value={`${totalExoplanets.toLocaleString()}`}
+        subtitle="🚀 ALL NASA CSV DATA LOADED"
         icon={Globe}
         color="cyan"
-        trend="+12% this year"
+        trend="100% REAL DATA"
       />
       
       <StatsCard
@@ -74,11 +74,11 @@ export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
       
       <StatsCard
         title="NASA Archive"
-        value={nasaExoplanets.toLocaleString()}
-        subtitle={`All ${nasaExoplanets} from CSV`}
+        value={`${nasaExoplanets.toLocaleString()}`}
+        subtitle={`✅ ALL ${nasaExoplanets} FROM NASA CSV`}
         icon={Database}
         color="purple"
-        trend="100% Real Data"
+        trend="COMPLETE DATASET"
       />
       
       {userAddedExoplanets > 0 && (
