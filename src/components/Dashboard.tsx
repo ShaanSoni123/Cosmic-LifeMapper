@@ -90,24 +90,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Check if data is still loading
   React.useEffect(() => {
-    const checkDataLoading = () => {
-      if (displayExoplanets.length > 0) {
-        setIsLoadingData(false);
-      }
-    };
-    
-    const interval = setInterval(checkDataLoading, 1000);
-    return () => clearInterval(interval);
+    // Set a timeout to stop loading after 3 seconds regardless
+    const timeout = setTimeout(() => {
+      setIsLoadingData(false);
+    }, 3000);
+
+    // Check if data is loaded
+    if (displayExoplanets.length > 0) {
+      setIsLoadingData(false);
+      clearTimeout(timeout);
+    }
+
+    return () => clearTimeout(timeout);
   }, [displayExoplanets.length]);
 
   // Show loading screen while data is loading
-  if (isLoadingData && displayExoplanets.length === 0) {
+  if (isLoadingData && displayExoplanets.length === 0 && totalCount === 0) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-center">
           <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h1 className="text-2xl mb-4">Loading Real NASA Data...</h1>
-          <p className="text-gray-400">Loading 1000+ accurate exoplanets from NASA CSV</p>
+          <h1 className="text-2xl mb-4">Loading Cosmic-LifeMapper...</h1>
+          <p className="text-gray-400">Initializing exoplanet database...</p>
           <div className="mt-4 flex justify-center space-x-2">
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>

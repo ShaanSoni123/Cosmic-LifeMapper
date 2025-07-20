@@ -51,7 +51,10 @@ class CSVDataLoader {
       
       if (!response.ok) {
         console.warn('Could not load CSV from public directory, using fallback');
-        return this.generateFallbackData();
+        this.csvData = this.generateFallbackData();
+        this.isLoaded = true;
+        isLoading = false;
+        return this.csvData;
       }
 
       const csvText = await response.text();
@@ -59,11 +62,15 @@ class CSVDataLoader {
       this.isLoaded = true;
       
       console.log(`✅ Successfully loaded ${this.csvData.length} exoplanets from NASA CSV`);
+      isLoading = false;
       return this.csvData;
       
     } catch (error) {
       console.error('❌ Error loading NASA CSV:', error);
-      return this.generateFallbackData();
+      this.csvData = this.generateFallbackData();
+      this.isLoaded = true;
+      isLoading = false;
+      return this.csvData;
     }
   }
 
