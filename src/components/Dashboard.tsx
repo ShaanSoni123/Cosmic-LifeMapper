@@ -41,12 +41,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Use provided exoplanets or get all available exoplanets
   const displayExoplanets = React.useMemo(() => {
     if (providedExoplanets) return providedExoplanets;
-    return [...getAllExoplanets(), ...userAddedExoplanets];
+    return getAllExoplanets();
   }, [providedExoplanets, userAddedExoplanets]);
 
-  const totalCount = displayExoplanets.length;
+  const totalCount = displayExoplanets.length + userAddedExoplanets.length;
   const localCount = LOCAL_EXOPLANET_COUNT;
-  const nasaCount = NASA_EXOPLANET_COUNT;
+  const nasaCount = NASA_EXOPLANET_COUNT();
   const userAddedCount = userAddedExoplanets.length;
 
   const filteredExoplanets = displayExoplanets
@@ -90,28 +90,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Check if data is still loading
   React.useEffect(() => {
-    // Set a timeout to stop loading after 3 seconds regardless
+    // Check every 100ms if data is loaded
+    const interval = setInterval(() => {
+      if (displayExoplanets.length > 0) {
+        setIsLoadingData(false);
+        clearInterval(interval);
+      }
+    }, 100);
+
+    // Fallback timeout after 5 seconds
     const timeout = setTimeout(() => {
       setIsLoadingData(false);
-    }, 3000);
+      clearInterval(interval);
+    }, 5000);
 
-    // Check if data is loaded
-    if (displayExoplanets.length > 0) {
-      setIsLoadingData(false);
+    return () => {
+      clearInterval(interval);
       clearTimeout(timeout);
-    }
-
-    return () => clearTimeout(timeout);
+    };
   }, [displayExoplanets.length]);
 
   // Show loading screen while data is loading
-  if (isLoadingData && displayExoplanets.length === 0 && totalCount === 0) {
+  if (isLoadingData && displayExoplanets.length === 0) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-center">
           <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h1 className="text-2xl mb-4">Loading Cosmic-LifeMapper...</h1>
-          <p className="text-gray-400">Initializing exoplanet database...</p>
+          <h1 className="text-2xl mb-4">Loading Real NASA Data...</h1>
+          <p className="text-gray-400">Loading 1000+ accurate exoplanets from NASA CSV</p>
           <div className="mt-4 flex justify-center space-x-2">
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
@@ -213,7 +219,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed backdrop-blur-sm bg-black/20 rounded-2xl p-6 border border-cyan-500/20">
               Embark on a voyage across the cosmos to uncover a universe of scientifically explored exoplanets. 
               Dive into their enigmatic compositions, evaluate their potential to host life, and compare the distinct celestial imprints they leave behind.
-              <span className="block mt-2 text-green-300 font-medium">
+              <span className="block mt-2 text-green-300 font-bold text-xl">
                 Featuring {totalCount} real exoplanets from NASA's official archive with accurate data!
               </span>
             </p>

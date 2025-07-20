@@ -15,7 +15,8 @@ function App() {
 
   // Combine static and dynamic exoplanets
   const combinedExoplanets = React.useMemo(() => {
-    return [...getAllExoplanets(), ...userAddedExoplanets];
+    const allExoplanets = getAllExoplanets();
+    return [...allExoplanets, ...userAddedExoplanets];
   }, [userAddedExoplanets]);
 
   const selectedExoplanet = selectedExoplanetId 
@@ -38,7 +39,7 @@ function App() {
 
   const handleAddNASAPlanet = (planetData: Exoplanet) => {
     // Check if planet already exists
-    const exists = combinedExoplanets.some(p => p.name === planetData.name);
+    const exists = combinedExoplanets.some(p => p.name.toLowerCase() === planetData.name.toLowerCase());
     if (!exists) {
       setUserAddedExoplanets(prev => [...prev, planetData]);
       console.log(`✅ Added ${planetData.name} to your collection`);
