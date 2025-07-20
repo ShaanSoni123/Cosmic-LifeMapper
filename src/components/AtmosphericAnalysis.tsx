@@ -11,27 +11,6 @@ export const AtmosphericAnalysis: React.FC<AtmosphericAnalysisProps> = ({ exopla
   // Generate atmospheric prediction
   const atmosphericInput = convertToAtmosphericInput(exoplanet);
   const report = atmosphericPredictor.generateReport(atmosphericInput);
-  
-  // Validate the atmospheric input parameters
-  console.log('Atmospheric Analysis Input:', {
-    planetName: exoplanet.name,
-    density: atmosphericInput.pl_dens,
-    orbitalPeriod: atmosphericInput.pl_orbper,
-    temperature: atmosphericInput.pl_eqtstr,
-    stellarRadius: atmosphericInput.st_rad,
-    stellarLuminosity: atmosphericInput.st_lum,
-    planetMass: atmosphericInput.pl_bmassj,
-    radiusRatio: atmosphericInput.pl_ratror,
-    stellarMetallicity: atmosphericInput.st_met
-  });
-  
-  console.log('Atmospheric Composition Report:', {
-    planetName: exoplanet.name,
-    dominantGas: report.dominantGas,
-    majorComponents: report.majorComponents,
-    habitabilityImpact: report.habitabilityImpact,
-    composition: report.composition
-  });
 
   const getGasIcon = (gas: string) => {
     switch (gas) {

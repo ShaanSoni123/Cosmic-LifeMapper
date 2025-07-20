@@ -32,16 +32,6 @@ export const BiosignatureChart: React.FC<BiosignatureChartProps> = ({ exoplanet 
   };
   
   const survivalAnalysis = calculateAtmosphericSurvival(atmosphericGasData);
-  
-  // Debug logging for biosignature calculations
-  console.log('Biosignature Analysis Debug:', {
-    planetName: exoplanet.name,
-    originalAtmosphere: exoplanet.atmosphere,
-    chemicalConcentrations,
-    atmosphericGasData,
-    survivalAnalysis,
-    biosignatureScore: biosignature?.score
-  });
 
   const chemicalData = [
     {

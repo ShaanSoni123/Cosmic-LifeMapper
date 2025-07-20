@@ -109,8 +109,6 @@ class AtmosphericPredictor {
     const temp = input.pl_eqtstr;
     const mass = input.pl_bmassj;
     const stellarLum = input.st_lum;
-    const orbitalPeriod = input.pl_orbper;
-    const density = input.pl_dens;
 
     // Temperature-based adjustments
     if (temp > 600) {
@@ -119,14 +117,12 @@ class AtmosphericPredictor {
       raw.O2 *= 0.3;
       raw.H2O *= 0.4;
       raw.SO2 *= 2.0;
-      raw.H2 *= 1.3; // Hot planets can have more hydrogen
     } else if (temp < 200) {
       // Cold planets: more noble gases, less water vapor
       raw.He *= 1.8;
       raw.H2 *= 1.5;
       raw.H2O *= 0.2;
       raw.NH3 *= 1.3;
-      raw.CO2 *= 0.7; // Less CO2 at low temperatures
     }
 
     // Mass-based adjustments
@@ -135,14 +131,11 @@ class AtmosphericPredictor {
       raw.H2 *= 1.4;
       raw.He *= 1.3;
       raw.CH4 *= 1.2;
-      raw.N2 *= 1.1; // Better nitrogen retention
     } else if (mass < 0.1) {
       // Low mass planets: lose lighter gases
       raw.H2 *= 0.3;
       raw.He *= 0.4;
       raw.H2O *= 0.6;
-      raw.N2 *= 0.8; // Reduced nitrogen retention
-      raw.O2 *= 0.7; // Reduced oxygen retention
     }
 
     // Stellar luminosity effects
@@ -151,34 +144,8 @@ class AtmosphericPredictor {
       raw.H2O *= 0.5;
       raw.CH4 *= 0.3;
       raw.O3 *= 0.2;
-      raw.NH3 *= 0.4; // Ammonia breaks down under high radiation
-    }
-    
-    // Orbital period effects (tidal locking considerations)
-    if (orbitalPeriod < 10) {
-      // Tidally locked planets
-      raw.H2O *= 0.6; // Water loss on day side
-      raw.CO2 *= 1.2; // CO2 can survive better
-    }
-    
-    // Density effects (rocky vs gas composition)
-    if (density > 5.0) {
-      // High density rocky planets
-      raw.H2 *= 0.7;
-      raw.He *= 0.6;
-      raw.CO2 *= 1.1;
-      raw.N2 *= 1.1;
-    } else if (density < 2.0) {
-      // Low density, possibly gas-rich
-      raw.H2 *= 1.3;
-      raw.He *= 1.4;
-      raw.CH4 *= 1.2;
     }
 
-    // Ensure minimum values for stability
-    Object.keys(raw).forEach(gas => {
-      raw[gas] = Math.max(0.01, raw[gas]);
-    });
     // Normalize to 100%
     const total = Object.values(raw).reduce((sum, val) => sum + val, 0);
     const normalized: AtmosphericComposition = {} as AtmosphericComposition;
@@ -281,64 +248,15 @@ export const atmosphericPredictor = new AtmosphericPredictor();
  * Convert exoplanet data to atmospheric input format with proper units
  */
 export function convertToAtmosphericInput(exoplanet: any): AtmosphericInput {
-  // Convert from frontend units to NASA parameter units with proper calculations
-  const earthMass = 5.97e24; // kg
-  const earthRadius = 6.371e6; // meters
-  const jupiterMass = 1.898e27; // kg
-  const solarRadius = 6.96e8; // meters
-  
-  // Calculate planet density in g/cm³
-  const planetMassKg = exoplanet.mass * earthMass;
-  const planetRadiusM = exoplanet.radius * earthRadius;
-  const planetVolumeM3 = (4/3) * Math.PI * Math.pow(planetRadiusM, 3);
-  const densityKgM3 = planetMassKg / planetVolumeM3;
-  const densityGCm3 = densityKgM3 / 1000; // Convert to g/cm³
-  
-  // Calculate stellar luminosity based on star type
-  let stellarLuminosity: number;
-  switch (exoplanet.starType) {
-    case 'M-dwarf': stellarLuminosity = 0.08; break;
-    case 'K-type': stellarLuminosity = 0.4; break;
-    case 'G-type': stellarLuminosity = 1.0; break;
-    case 'F-type': stellarLuminosity = 2.5; break;
-    case 'A-type': stellarLuminosity = 8.0; break;
-    default: stellarLuminosity = 1.0;
-  }
-  
-  // Calculate stellar radius based on star type
-  let stellarRadius: number;
-  switch (exoplanet.starType) {
-    case 'M-dwarf': stellarRadius = 0.4; break;
-    case 'K-type': stellarRadius = 0.8; break;
-    case 'G-type': stellarRadius = 1.0; break;
-    case 'F-type': stellarRadius = 1.3; break;
-    case 'A-type': stellarRadius = 1.8; break;
-    default: stellarRadius = 1.0;
-  }
-  
-  // Calculate planet-to-star radius ratio
-  const planetRadiusEarth = exoplanet.radius;
-  const planetRadiusSolar = planetRadiusEarth * earthRadius / solarRadius;
-  const radiusRatio = planetRadiusSolar / stellarRadius;
-  
-  // Calculate stellar metallicity based on discovery year and star type
-  let stellarMetallicity: number;
-  if (exoplanet.starType === 'M-dwarf') {
-    stellarMetallicity = -0.2; // M-dwarfs tend to be metal-poor
-  } else if (exoplanet.starType === 'G-type') {
-    stellarMetallicity = 0.0; // Sun-like metallicity
-  } else {
-    stellarMetallicity = -0.1 + Math.random() * 0.3; // Varied metallicity
-  }
-  
+  // Convert from frontend units to NASA parameter units (matching param_uni.txt)
   return {
-    pl_dens: densityGCm3, // Planet Density (g/cm³)
+    pl_dens: (exoplanet.mass * 5.97e24) / ((4/3) * Math.PI * Math.pow(exoplanet.radius * 6.371e6, 3)) / 1000, // Planet Density (g/cm³) - matches param_uni.txt
     pl_orbper: exoplanet.orbitalPeriod, // Orbital Period (days) - matches param_uni.txt
     pl_eqtstr: exoplanet.temperature, // Equilibrium Temperature (K) - matches param_uni.txt
-    st_rad: stellarRadius, // Stellar Radius (Solar Radii)
-    st_lum: stellarLuminosity, // Stellar Luminosity (Solar Units)
-    pl_bmassj: (exoplanet.mass * earthMass) / jupiterMass, // Planet Mass (Jupiter Masses)
-    pl_ratror: radiusRatio, // Ratio of Planet to Stellar Radius
-    st_met: stellarMetallicity // Stellar Metallicity [Fe/H]
+    st_rad: 1.0, // Stellar Radius (Solar Radii) - matches param_uni.txt
+    st_lum: exoplanet.starType === 'M-dwarf' ? 0.1 : exoplanet.starType === 'K-type' ? 0.5 : 1.0, // Stellar Luminosity (Solar Units) - matches param_uni.txt
+    pl_bmassj: exoplanet.mass / 317.8, // Planet Mass (Jupiter Masses) - matches param_uni.txt
+    pl_ratror: exoplanet.radius / 109.2, // Ratio of Planet to Stellar Radius - matches param_uni.txt
+    st_met: 0.0 // Stellar Metallicity [Fe/H] - matches param_uni.txt
   };
 }

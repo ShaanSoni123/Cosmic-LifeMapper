@@ -128,9 +128,7 @@ export function calculateHabitabilityScore(data: RawExoplanetData): number {
   // Step 1: Habitable Zone Check
   const hzBounds = calculateHabitableZoneBounds(data.star_temperature);
   const inHz = data.orbital_distance >= hzBounds.inner && data.orbital_distance <= hzBounds.outer;
-  const hzCenter = (hzBounds.inner + hzBounds.outer) / 2;
-  const hzWidth = hzBounds.outer - hzBounds.inner;
-  const hzFactor = inHz ? 1.0 : Math.max(0.1, 1.0 - Math.abs(data.orbital_distance - hzCenter) / hzWidth);
+  const hzFactor = inHz ? 1.0 : Math.max(0.1, 1.0 - Math.abs(data.orbital_distance - (hzBounds.inner + hzBounds.outer) / 2) / hzBounds.outer);
 
   // Step 2: Planet Size Factor (Earth-like = 1.0)
   const radiusFactor = Math.exp(-Math.pow(data.planet_radius - 1.0, 2) / (2 * Math.pow(0.5, 2)));
@@ -148,15 +146,8 @@ export function calculateHabitabilityScore(data: RawExoplanetData): number {
   const radiationSafety = 1 - calculateRadiationHazardIndex(data.star_temperature, data.stellar_luminosity, data.orbital_distance, data.host_star_age);
   
   // Step 7: Mass Factor (too small = can't hold atmosphere, too large = gas giant)
-  let massFactor: number;
-  if (data.planet_mass < 0.3) {
-    massFactor = 0.1; // Too small to retain atmosphere
-  } else if (data.planet_mass > 15) {
-    massFactor = 0.2; // Too large, likely gas giant
-  } else {
-    // Optimal range around 1-5 Earth masses
-    massFactor = Math.exp(-Math.pow(data.planet_mass - 2.0, 2) / (2 * Math.pow(2.5, 2)));
-  }
+  const massFactor = data.planet_mass >= 0.5 && data.planet_mass <= 10 ? 
+    Math.exp(-Math.pow(data.planet_mass - 2.0, 2) / (2 * Math.pow(3.0, 2))) : 0.1;
 
   // Combine all factors with proper weighting
   const scoreRaw = hzFactor * 0.25 +           // 25% - Must be in habitable zone
@@ -249,17 +240,16 @@ function generateAtmosphere(data: RawExoplanetData): Exoplanet['atmosphere'] {
   let nitrogen, oxygen, carbonDioxide, methane;
   
   if (planetType === 'gas-giant') {
-    // Gas giants have hydrogen-helium dominated atmospheres, but we model the trace gases
-    nitrogen = 10 + Math.random() * 15;
-    oxygen = Math.random() * 3;
-    carbonDioxide = 2 + Math.random() * 8;
-    methane = 8 + Math.random() * 20; // Higher methane for gas giants
+    // Gas giants have different atmospheric composition
+    nitrogen = 20 + Math.random() * 30;
+    oxygen = Math.random() * 5;
+    carbonDioxide = 10 + Math.random() * 20;
     methane = 5 + Math.random() * 15;
   } else {
-    nitrogen = 65 + Math.random() * 15;
-    oxygen = 12 + Math.random() * 12;
-    carbonDioxide = 8 + Math.random() * 12;
-    methane = Math.random() * 3;
+    // Rocky planets and super-earths
+    nitrogen = 65 + habitabilityScore * 15 + Math.random() * 10;
+    oxygen = habitabilityScore * 18 + Math.random() * 7;
+    carbonDioxide = Math.max(0.1, 20 - habitabilityScore * 15 + (surfaceTemp - 288) / 25);
     methane = Math.random() * 3;
   }
 
@@ -333,24 +323,16 @@ export function convertToExoplanet(data: RawExoplanetData, index: number): Exopl
     radius: Math.round(data.planet_radius * 100) / 100,
     temperature: Math.round(surfaceTemp),
     habitabilityScore: Math.round(enhancedHabitabilityScore),
-      nitrogen -= 15; // Low mass planets lose lighter gases
-      oxygen -= 8;
-      methane -= 1;
+    starType: getStarType(data.star_temperature),
+    orbitalPeriod: Math.round(data.orbital_period * 10) / 10,
     discoveryYear,
     minerals: generateMinerals(data),
     bacteria: generateBacteria(data),
-  // Ensure all values are positive
-  nitrogen = Math.max(5, nitrogen);
-  oxygen = Math.max(0.1, oxygen);
-  carbonDioxide = Math.max(0.1, carbonDioxide);
-  methane = Math.max(0.01, methane);
-
     atmosphere: atmosphere,
     biosignature: {
-      nitrogen -= 20;
-      carbonDioxide += 25;
-      oxygen -= 10;
-      methane += 2; // Hot planets can have more methane from thermal processes
+      score: Math.round(biosignatureReport.HabitabilityScore * 10) / 10,
+      classification: getBiosignatureClassification(biosignatureReport.HabitabilityScore),
+      chemicalAnalysis: biosignatureReport
     }
   };
 }
