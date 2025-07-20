@@ -41,7 +41,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Use provided exoplanets or get all available exoplanets
   const displayExoplanets = React.useMemo(() => {
     if (providedExoplanets) return providedExoplanets;
-    return getAllExoplanets();
+    const allExoplanets = getAllExoplanets();
+    console.log(`Dashboard: Got ${allExoplanets.length} exoplanets`);
+    return allExoplanets;
   }, [providedExoplanets, userAddedExoplanets]);
 
   const totalCount = displayExoplanets.length + userAddedExoplanets.length;
@@ -90,19 +92,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Check if data is still loading
   React.useEffect(() => {
-    // Check every 100ms if data is loaded
+    // Check every 500ms if data is loaded
     const interval = setInterval(() => {
       if (displayExoplanets.length > 0) {
         setIsLoadingData(false);
         clearInterval(interval);
+        console.log(`✅ Data loaded: ${displayExoplanets.length} exoplanets`);
       }
-    }, 100);
+    }, 500);
 
-    // Fallback timeout after 5 seconds
+    // Fallback timeout after 8 seconds
     const timeout = setTimeout(() => {
       setIsLoadingData(false);
       clearInterval(interval);
-    }, 5000);
+      console.log(`⏰ Timeout reached, showing ${displayExoplanets.length} exoplanets`);
+    }, 8000);
 
     return () => {
       clearInterval(interval);
@@ -111,13 +115,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, [displayExoplanets.length]);
 
   // Show loading screen while data is loading
-  if (isLoadingData && displayExoplanets.length === 0) {
+  if (isLoadingData && displayExoplanets.length < 10) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-center">
           <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h1 className="text-2xl mb-4">Loading Real NASA Data...</h1>
           <p className="text-gray-400">Loading 1000+ accurate exoplanets from NASA CSV</p>
+          <p className="text-gray-500 text-sm mt-2">Currently loaded: {displayExoplanets.length} planets</p>
           <div className="mt-4 flex justify-center space-x-2">
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>

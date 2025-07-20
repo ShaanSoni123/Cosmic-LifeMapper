@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { ExoplanetDetail } from './components/ExoplanetDetail';
 import { ComparisonTool } from './components/ComparisonTool';
-import { exoplanets as allExoplanets, getAllExoplanets } from './data/exoplanets';
+import { getAllExoplanets } from './data/exoplanets';
 import { Exoplanet } from './types/exoplanet';
 
 type View = 'dashboard' | 'detail' | 'compare';
@@ -16,6 +16,7 @@ function App() {
   // Combine static and dynamic exoplanets
   const combinedExoplanets = React.useMemo(() => {
     const allExoplanets = getAllExoplanets();
+    console.log(`App: Combined ${allExoplanets.length} base + ${userAddedExoplanets.length} user exoplanets`);
     return [...allExoplanets, ...userAddedExoplanets];
   }, [userAddedExoplanets]);
 
@@ -39,7 +40,9 @@ function App() {
 
   const handleAddNASAPlanet = (planetData: Exoplanet) => {
     // Check if planet already exists
-    const exists = combinedExoplanets.some(p => p.name.toLowerCase() === planetData.name.toLowerCase());
+    const exists = combinedExoplanets.some(p => 
+      p.name.toLowerCase() === planetData.name.toLowerCase() || p.id === planetData.id
+    );
     if (!exists) {
       setUserAddedExoplanets(prev => [...prev, planetData]);
       console.log(`✅ Added ${planetData.name} to your collection`);

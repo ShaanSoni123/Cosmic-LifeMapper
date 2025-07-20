@@ -276,6 +276,7 @@ function convertNASARowToExoplanet(row: any, index: number): Exoplanet {
  */
 async function loadNASACSVData(): Promise<Exoplanet[]> {
   if (isDataLoaded && realNASAExoplanets.length > 0) {
+    console.log(`📊 Using cached NASA data: ${realNASAExoplanets.length} exoplanets`);
     return realNASAExoplanets;
   }
 
@@ -285,7 +286,10 @@ async function loadNASACSVData(): Promise<Exoplanet[]> {
     const response = await fetch('/data/nasa_exoplanet_data_2025-07-19.csv');
     
     if (!response.ok) {
-      throw new Error(`Failed to load CSV: ${response.status}`);
+      console.warn(`⚠️ Failed to load CSV: ${response.status}, using fallback data`);
+      realNASAExoplanets = generateFallbackExoplanets();
+      isDataLoaded = true;
+      return realNASAExoplanets;
     }
 
     const csvText = await response.text();
@@ -293,7 +297,10 @@ async function loadNASACSVData(): Promise<Exoplanet[]> {
     
     const lines = csvText.trim().split('\n');
     if (lines.length < 2) {
-      throw new Error('Invalid CSV format');
+      console.warn('⚠️ Invalid CSV format, using fallback data');
+      realNASAExoplanets = generateFallbackExoplanets();
+      isDataLoaded = true;
+      return realNASAExoplanets;
     }
 
     const headers = parseCSVLine(lines[0]);
@@ -339,6 +346,8 @@ async function loadNASACSVData(): Promise<Exoplanet[]> {
  * Generate fallback exoplanets if CSV fails
  */
 function generateFallbackExoplanets(): Exoplanet[] {
+  console.log('🔄 Generating enhanced fallback exoplanet data...');
+  
   const fallbackPlanets = [
     { name: 'Kepler-452b', radius: 1.63, mass: 5.0, temp: 265, period: 384.8, year: 2015, distance: 1402 },
     { name: 'TRAPPIST-1e', radius: 0.92, mass: 0.77, temp: 251, period: 6.1, year: 2017, distance: 40.7 },
@@ -349,10 +358,21 @@ function generateFallbackExoplanets(): Exoplanet[] {
     { name: 'Kepler-62f', radius: 1.41, mass: 3.3, temp: 208, period: 267.3, year: 2013, distance: 1200 },
     { name: 'Tau Ceti e', radius: 1.9, mass: 4.5, temp: 241, period: 168.1, year: 2012, distance: 11.9 },
     { name: 'Wolf 1061c', radius: 1.6, mass: 4.3, temp: 223, period: 17.9, year: 2015, distance: 13.8 },
-    { name: 'K2-18b', radius: 2.6, mass: 8.0, temp: 265, period: 33.0, year: 2015, distance: 124 }
+    { name: 'K2-18b', radius: 2.6, mass: 8.0, temp: 265, period: 33.0, year: 2015, distance: 124 },
+    // Add more fallback planets to ensure we have a good dataset
+    { name: 'Kepler-438b', radius: 1.12, mass: 1.5, temp: 276, period: 35.2, year: 2015, distance: 640 },
+    { name: 'Kepler-440b', radius: 1.86, mass: 4.8, temp: 273, period: 101.1, year: 2015, distance: 851 },
+    { name: 'Ross 128b', radius: 1.35, mass: 1.8, temp: 269, period: 9.9, year: 2017, distance: 11.0 },
+    { name: 'LHS 1140b', radius: 1.43, mass: 6.6, temp: 230, period: 24.7, year: 2017, distance: 40.7 },
+    { name: 'Kepler-22b', radius: 2.4, mass: 5.4, temp: 262, period: 289.9, year: 2011, distance: 620 },
+    { name: 'GJ 273b', radius: 1.2, mass: 2.9, temp: 237, period: 18.6, year: 2017, distance: 12.4 },
+    { name: 'Kapteyn b', radius: 1.1, mass: 4.8, temp: 184, period: 48.6, year: 2014, distance: 12.8 },
+    { name: 'K2-3d', radius: 1.5, mass: 2.7, temp: 256, period: 44.6, year: 2015, distance: 137 },
+    { name: 'HD 85512b', radius: 1.4, mass: 3.6, temp: 298, period: 58.4, year: 2011, distance: 36.2 },
+    { name: 'Kepler-62d', radius: 1.43, mass: 3.9, temp: 241, period: 18.2, year: 2013, distance: 1200 }
   ];
 
-  return fallbackPlanets.map((planet, index) => {
+  const generatedPlanets = fallbackPlanets.map((planet, index) => {
     const habitabilityScore = calculateHabitabilityFromNASA({
       radius: planet.radius,
       mass: planet.mass,
@@ -391,27 +411,48 @@ function generateFallbackExoplanets(): Exoplanet[] {
       }
     };
   });
+  
+  console.log(`✅ Generated ${generatedPlanets.length} fallback exoplanets`);
+  return generatedPlanets;
 }
 
 // Initialize data loading immediately
-const dataPromise = loadNASACSVData();
+let dataPromise: Promise<Exoplanet[]> | null = null;
+
+// Initialize data loading
+function initializeData() {
+  if (!dataPromise) {
+    dataPromise = loadNASACSVData();
+  }
+  return dataPromise;
+}
 
 // Export the exoplanets - this will be populated once data loads
 export let exoplanets: Exoplanet[] = [];
 
-// Initialize with data
-dataPromise.then(data => {
-  exoplanets.length = 0; // Clear array
-  exoplanets.push(...data); // Add all loaded data
+// Initialize data immediately
+initializeData().then(data => {
+  exoplanets.length = 0;
+  exoplanets.push(...data);
+  console.log(`✅ Initialized with ${exoplanets.length} exoplanets`);
 });
-
 // Export counts
 export const EXOPLANET_COUNT = () => exoplanets.length;
 export const LOCAL_EXOPLANET_COUNT = 0;
 export const NASA_EXOPLANET_COUNT = () => exoplanets.length;
 
 // Get all exoplanets
-export const getAllExoplanets = () => exoplanets;
+export const getAllExoplanets = (): Exoplanet[] => {
+  // If data isn't loaded yet, try to load it
+  if (exoplanets.length === 0 && !isDataLoaded) {
+    // Return empty array but trigger loading
+    initializeData().then(data => {
+      exoplanets.length = 0;
+      exoplanets.push(...data);
+    });
+  }
+  return exoplanets;
+};
 
 // Check if data is loading
 export const isExoplanetsLoading = () => !isDataLoaded;
@@ -420,7 +461,9 @@ export const isExoplanetsLoading = () => !isDataLoaded;
 export const refreshExoplanets = async (): Promise<void> => {
   console.log('🔄 Refreshing NASA exoplanet data...');
   isDataLoaded = false;
+  dataPromise = null; // Reset the promise
   const data = await loadNASACSVData();
   exoplanets.length = 0;
   exoplanets.push(...data);
+  console.log(`🔄 Refreshed with ${exoplanets.length} exoplanets`);
 };
