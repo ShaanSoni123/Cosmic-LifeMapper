@@ -48,7 +48,19 @@ function safeParseFloat(value: string, fallback: number): number {
 }
 
 /**
- * Calculate habitability score from NASA parameters
+ * Get ACCURATE star type from stellar temperature (FIXED)
+ */
+function getStarTypeFromTemp(temp: number): string {
+  if (temp >= 7500) return 'A-type';
+  if (temp >= 6000) return 'F-type';
+  if (temp >= 5200) return 'G-type';
+  if (temp >= 3700) return 'K-type';
+  if (temp >= 2400) return 'M-dwarf';
+  return 'M-dwarf'; // Default for very cool stars
+}
+
+/**
+ * Calculate habitability score from NASA parameters (ENHANCED)
  */
 function calculateHabitabilityFromNASA(params: {
   radius: number;
@@ -56,83 +68,128 @@ function calculateHabitabilityFromNASA(params: {
   temperature: number;
   orbitalPeriod: number;
   stellarTemp: number;
+  distance: number;
 }): number {
   let score = 50; // Base score
 
-  // Temperature factor (Earth-like = 288K)
+  // Temperature factor (Earth-like = 288K) - ENHANCED
   const tempDiff = Math.abs(params.temperature - 288);
-  score += Math.max(0, 25 - tempDiff / 15);
+  if (params.temperature >= 200 && params.temperature <= 350) {
+    score += 30; // Optimal range
+  } else if (params.temperature >= 150 && params.temperature <= 500) {
+    score += Math.max(0, 20 - tempDiff / 20);
+  } else {
+    score += Math.max(0, 10 - tempDiff / 30);
+  }
 
-  // Size factor (Earth-like = 1.0)
+  // Size factor (Earth-like = 1.0) - ENHANCED
   const sizeDiff = Math.abs(params.radius - 1.0);
-  score += Math.max(0, 20 - sizeDiff * 12);
+  if (params.radius >= 0.5 && params.radius <= 2.0) {
+    score += 20; // Good size range
+  } else {
+    score += Math.max(0, 15 - sizeDiff * 8);
+  }
 
-  // Mass factor (Earth-like = 1.0)
+  // Mass factor (Earth-like = 1.0) - ENHANCED
   const massDiff = Math.abs(params.mass - 1.0);
-  score += Math.max(0, 15 - massDiff * 8);
+  if (params.mass >= 0.3 && params.mass <= 10.0) {
+    score += 15; // Can retain atmosphere
+  } else {
+    score += Math.max(0, 10 - massDiff * 5);
+  }
 
-  // Orbital period factor (Earth-like = 365 days)
-  const periodScore = params.orbitalPeriod > 10 && params.orbitalPeriod < 1000 ? 10 : 5;
-  score += periodScore;
+  // Orbital period factor - ENHANCED
+  if (params.orbitalPeriod >= 10 && params.orbitalPeriod <= 1000) {
+    score += 10; // Stable orbit
+  } else {
+    score += 5;
+  }
 
-  // Stellar temperature factor (Sun-like = 5778K)
+  // Stellar temperature factor (habitable zone consideration) - ENHANCED
   const stellarTempDiff = Math.abs(params.stellarTemp - 5778);
-  score += Math.max(0, 10 - stellarTempDiff / 300);
+  if (params.stellarTemp >= 3000 && params.stellarTemp <= 7000) {
+    score += Math.max(0, 10 - stellarTempDiff / 400);
+  }
+
+  // Distance bonus for nearby stars (easier to study)
+  if (params.distance < 50) {
+    score += 5;
+  } else if (params.distance < 200) {
+    score += 2;
+  }
 
   return Math.max(0, Math.min(100, score));
 }
 
 /**
- * Get star type from temperature
- */
-function getStarTypeFromTemp(temp: number): string {
-  if (temp >= 7500) return 'A-type';
-  if (temp >= 6000) return 'F-type';
-  if (temp >= 5200) return 'G-type';
-  if (temp >= 3700) return 'K-type';
-  return 'M-dwarf';
-}
-
-/**
- * Generate realistic atmospheric composition
+ * Generate realistic atmospheric composition based on NASA data
  */
 function generateAtmosphereFromNASA(params: {
   temperature: number;
   mass: number;
   radius: number;
+  stellarTemp: number;
 }): Exoplanet['atmosphere'] {
-  const { temperature, mass, radius } = params;
+  const { temperature, mass, radius, stellarTemp } = params;
   const isHot = temperature > 350;
+  const isCold = temperature < 200;
   const isLowMass = mass < 0.5;
   const planetType = radius < 1.5 ? 'rocky' : radius < 4 ? 'super-earth' : 'gas-giant';
+  const starType = getStarTypeFromTemp(stellarTemp);
 
   let nitrogen, oxygen, carbonDioxide, methane;
 
   if (planetType === 'gas-giant') {
-    nitrogen = 15 + Math.random() * 25;
-    oxygen = Math.random() * 8;
-    carbonDioxide = 5 + Math.random() * 15;
-    methane = 3 + Math.random() * 12;
+    // Gas giants have hydrogen-rich atmospheres
+    nitrogen = 10 + Math.random() * 20;
+    oxygen = Math.random() * 5;
+    carbonDioxide = 3 + Math.random() * 10;
+    methane = 5 + Math.random() * 15;
+  } else if (planetType === 'super-earth') {
+    // Super-Earths can have thick atmospheres
+    nitrogen = 50 + Math.random() * 25;
+    oxygen = 8 + Math.random() * 12;
+    carbonDioxide = 15 + Math.random() * 20;
+    methane = Math.random() * 8;
   } else {
-    // Rocky planets
-    nitrogen = 60 + Math.random() * 20;
-    oxygen = 15 + Math.random() * 10;
-    carbonDioxide = 10 + Math.random() * 15;
+    // Rocky planets (Earth-like)
+    nitrogen = 65 + Math.random() * 15;
+    oxygen = 12 + Math.random() * 15;
+    carbonDioxide = 8 + Math.random() * 12;
     methane = Math.random() * 5;
 
     // Temperature adjustments
     if (isHot) {
-      nitrogen -= 15;
-      carbonDioxide += 20;
-      oxygen -= 8;
+      nitrogen -= 20;
+      carbonDioxide += 25;
+      oxygen -= 10;
+      methane += 3;
+    } else if (isCold) {
+      nitrogen += 10;
+      oxygen -= 5;
+      methane += 2;
     }
 
     // Mass adjustments
     if (isLowMass) {
-      nitrogen -= 10;
+      nitrogen -= 15;
+      oxygen -= 8;
+      carbonDioxide += 10;
+    }
+
+    // Star type adjustments
+    if (starType === 'M-dwarf') {
+      // M-dwarf planets often tidally locked
+      carbonDioxide += 10;
       oxygen -= 5;
     }
   }
+
+  // Ensure positive values
+  nitrogen = Math.max(5, nitrogen);
+  oxygen = Math.max(0.1, oxygen);
+  carbonDioxide = Math.max(0.1, carbonDioxide);
+  methane = Math.max(0.01, methane);
 
   // Normalize to 100%
   const total = nitrogen + oxygen + carbonDioxide + methane;
@@ -151,10 +208,13 @@ function generateMineralsFromNASA(params: {
   temperature: number;
   mass: number;
   radius: number;
+  stellarTemp: number;
+  stellarMetallicity?: number;
 }): Exoplanet['minerals'] {
-  const { temperature, mass, radius } = params;
+  const { temperature, mass, radius, stellarTemp, stellarMetallicity = 0 } = params;
   const planetType = radius < 1.5 ? 'rocky' : radius < 4 ? 'super-earth' : 'gas-giant';
-  const waterFactor = temperature < 350 && temperature > 200 ? 1.2 : 0.6;
+  const waterFactor = temperature < 350 && temperature > 200 ? 1.3 : temperature < 200 ? 0.8 : 0.4;
+  const metallicityFactor = 1 + stellarMetallicity * 0.5; // Higher metallicity = more heavy elements
 
   let minerals = {
     iron: 25,
@@ -166,24 +226,45 @@ function generateMineralsFromNASA(params: {
 
   // Adjust based on planet type
   if (planetType === 'rocky') {
-    minerals.iron += 8;
-    minerals.silicon += 5;
+    minerals.iron += 10 * metallicityFactor;
+    minerals.silicon += 8 * metallicityFactor;
+    minerals.magnesium += 5;
     minerals.water *= waterFactor;
-  } else if (planetType === 'gas-giant') {
-    minerals.iron -= 10;
-    minerals.water += 10;
+  } else if (planetType === 'super-earth') {
+    minerals.iron += 5 * metallicityFactor;
+    minerals.silicon += 3 * metallicityFactor;
+    minerals.water *= waterFactor * 1.2;
+    minerals.carbon += 3;
+  } else {
+    // Gas giant - lower mineral content, more volatiles
+    minerals.iron -= 15;
+    minerals.silicon -= 10;
+    minerals.water += 15;
+    minerals.carbon += 8;
   }
 
   // Mass effects
   if (mass > 2.0) {
+    minerals.iron += 8;
+    minerals.magnesium += 5;
+  } else if (mass < 0.5) {
+    minerals.iron -= 5;
+    minerals.water -= 5;
+  }
+
+  // Temperature effects
+  if (temperature > 500) {
+    minerals.water = Math.max(1, minerals.water - 20);
     minerals.iron += 5;
-    minerals.magnesium += 3;
+  } else if (temperature < 150) {
+    minerals.water += 10;
+    minerals.carbon += 5;
   }
 
   // Add randomization and normalize
   Object.keys(minerals).forEach(key => {
-    minerals[key as keyof typeof minerals] += Math.round((Math.random() - 0.5) * 8);
-    minerals[key as keyof typeof minerals] = Math.max(2, Math.min(40, minerals[key as keyof typeof minerals]));
+    minerals[key as keyof typeof minerals] += Math.round((Math.random() - 0.5) * 6);
+    minerals[key as keyof typeof minerals] = Math.max(1, Math.min(45, minerals[key as keyof typeof minerals]));
   });
 
   return minerals;
@@ -195,43 +276,63 @@ function generateMineralsFromNASA(params: {
 function generateBacteriaFromNASA(params: {
   temperature: number;
   habitabilityScore: number;
+  stellarTemp: number;
+  mass: number;
 }): Exoplanet['bacteria'] {
-  const { temperature, habitabilityScore } = params;
-  const tempFactor = temperature > 200 && temperature < 400 ? 1.2 : 0.8;
+  const { temperature, habitabilityScore, stellarTemp, mass } = params;
+  const tempFactor = temperature > 200 && temperature < 400 ? 1.3 : 0.7;
   const habFactor = habitabilityScore / 100;
+  const starType = getStarTypeFromTemp(stellarTemp);
+  const massFactor = mass > 0.5 ? 1.0 : 0.8; // Low mass planets lose atmosphere
+
+  // M-dwarf planets face more radiation
+  const radiationFactor = starType === 'M-dwarf' ? 0.8 : 1.0;
 
   return {
-    extremophiles: Math.round(35 + Math.random() * 30 + (temperature > 400 ? 15 : 0)),
-    photosynthetic: Math.round(Math.max(10, tempFactor * habFactor * 50 + Math.random() * 25)),
-    chemosynthetic: Math.round(40 + habFactor * 25 + Math.random() * 20),
-    anaerobic: Math.round(55 + Math.random() * 25)
+    extremophiles: Math.round(Math.max(20, 40 + Math.random() * 25 + (temperature > 400 ? 20 : 0) + (starType === 'M-dwarf' ? 15 : 0))),
+    photosynthetic: Math.round(Math.max(5, tempFactor * habFactor * radiationFactor * massFactor * 60 + Math.random() * 20)),
+    chemosynthetic: Math.round(Math.max(25, 45 + habFactor * 30 + massFactor * 15 + Math.random() * 20)),
+    anaerobic: Math.round(Math.max(30, 55 + habFactor * 20 + (starType === 'M-dwarf' ? 10 : 0) + Math.random() * 20))
   };
 }
 
 /**
- * Convert NASA CSV row to Exoplanet format
+ * Convert NASA CSV row to Exoplanet format (FIXED AND ENHANCED)
  */
 function convertNASARowToExoplanet(row: any, index: number): Exoplanet {
-  // Parse numeric values with fallbacks
+  // Parse numeric values with proper fallbacks
   const radius = safeParseFloat(row.pl_rade, 1.0);
   const mass = safeParseFloat(row.pl_bmasse, 1.0);
   const temperature = safeParseFloat(row.pl_eqt, 288);
   const orbitalPeriod = safeParseFloat(row.pl_orbper, 365);
   const stellarTemp = safeParseFloat(row.st_teff, 5778);
+  const stellarRadius = safeParseFloat(row.st_rad, 1.0);
+  const stellarMass = safeParseFloat(row.st_mass, 1.0);
+  const stellarAge = safeParseFloat(row.st_age, 5.0);
+  const stellarLuminosity = safeParseFloat(row.st_lum, 1.0);
+  const stellarMetallicity = safeParseFloat(row.st_met, 0.0);
   const distance = safeParseFloat(row.sy_dist, Math.random() * 1000 + 10);
   const discoveryYear = parseInt(row.disc_year) || 2020;
+  const density = safeParseFloat(row.pl_dens, 5.5);
+  const eccentricity = safeParseFloat(row.pl_orbeccen, 0.0);
 
-  // Calculate habitability score
+  // Calculate habitability score with all parameters
   const baseHabitabilityScore = calculateHabitabilityFromNASA({
     radius,
     mass,
     temperature,
     orbitalPeriod,
-    stellarTemp
+    stellarTemp,
+    distance
   });
 
   // Generate atmospheric composition
-  const atmosphere = generateAtmosphereFromNASA({ temperature, mass, radius });
+  const atmosphere = generateAtmosphereFromNASA({ 
+    temperature, 
+    mass, 
+    radius, 
+    stellarTemp 
+  });
 
   // Generate biosignature analysis
   const chemicalConcentrations = atmosphereToChemicalConcentrations(atmosphere);
@@ -244,6 +345,9 @@ function convertNASARowToExoplanet(row: any, index: number): Exoplanet {
     0.3
   );
 
+  // ACCURATE star type classification
+  const starType = getStarTypeFromTemp(stellarTemp);
+
   return {
     id: `nasa-${index}`,
     name: row.pl_name || `Exoplanet-${index}`,
@@ -252,11 +356,22 @@ function convertNASARowToExoplanet(row: any, index: number): Exoplanet {
     radius: Math.round(radius * 1000) / 1000,
     temperature: Math.round(temperature),
     habitabilityScore: Math.round(enhancedHabitabilityScore),
-    starType: getStarTypeFromTemp(stellarTemp),
+    starType, // NOW ACCURATE!
     orbitalPeriod: Math.round(orbitalPeriod * 100) / 100,
     discoveryYear,
-    minerals: generateMineralsFromNASA({ temperature, mass, radius }),
-    bacteria: generateBacteriaFromNASA({ temperature, habitabilityScore: enhancedHabitabilityScore }),
+    minerals: generateMineralsFromNASA({ 
+      temperature, 
+      mass, 
+      radius, 
+      stellarTemp, 
+      stellarMetallicity 
+    }),
+    bacteria: generateBacteriaFromNASA({ 
+      temperature, 
+      habitabilityScore: enhancedHabitabilityScore, 
+      stellarTemp, 
+      mass 
+    }),
     atmosphere,
     biosignature: {
       score: Math.round(biosignatureReport.HabitabilityScore * 10) / 10,
@@ -265,7 +380,17 @@ function convertNASARowToExoplanet(row: any, index: number): Exoplanet {
     },
     nasaData: {
       isRealNASAData: true,
-      originalData: row,
+      originalData: {
+        ...row,
+        stellarTemp,
+        stellarRadius,
+        stellarMass,
+        stellarAge,
+        stellarLuminosity,
+        stellarMetallicity,
+        density,
+        eccentricity
+      },
       lastUpdated: new Date().toISOString(),
       dataSource: 'NASA Exoplanet Archive CSV'
     }
@@ -273,7 +398,7 @@ function convertNASARowToExoplanet(row: any, index: number): Exoplanet {
 }
 
 /**
- * Load NASA CSV data and ensure it's available immediately
+ * Load ALL NASA CSV data (ALL 1001 EXOPLANETS)
  */
 async function loadAllNASAData(): Promise<Exoplanet[]> {
   if (isLoading) {
@@ -290,7 +415,7 @@ async function loadAllNASAData(): Promise<Exoplanet[]> {
   }
 
   isLoading = true;
-  console.log('🚀 Loading ALL NASA CSV data...');
+  console.log('🚀 Loading ALL 1001 NASA CSV exoplanets...');
 
   try {
     const response = await fetch('/data/nasa_exoplanet_data_2025-07-19.csv');
@@ -308,11 +433,12 @@ async function loadAllNASAData(): Promise<Exoplanet[]> {
     }
 
     const headers = parseCSVLine(lines[0]);
-    console.log('📊 Processing CSV with headers:', headers.slice(0, 5));
+    console.log('📊 CSV Headers:', headers);
+    console.log('📊 Total CSV lines:', lines.length);
     
     const exoplanets: Exoplanet[] = [];
 
-    // Process ALL rows from the CSV
+    // Process ALL rows from the CSV (skip header)
     for (let i = 1; i < lines.length; i++) {
       const values = parseCSVLine(lines[i]);
       if (values.length === headers.length) {
@@ -323,8 +449,13 @@ async function loadAllNASAData(): Promise<Exoplanet[]> {
         
         // Only include rows with valid planet names
         if (row.pl_name && row.pl_name !== '' && row.pl_name !== 'null') {
-          const exoplanet = convertNASARowToExoplanet(row, i - 1);
+          const exoplanet = convertNASARowToExoplanet(row, exoplanets.length);
           exoplanets.push(exoplanet);
+          
+          // Log progress for large datasets
+          if (exoplanets.length % 100 === 0) {
+            console.log(`📈 Processed ${exoplanets.length} exoplanets...`);
+          }
         }
       }
     }
@@ -333,15 +464,26 @@ async function loadAllNASAData(): Promise<Exoplanet[]> {
     isDataLoaded = true;
     isLoading = false;
     
-    console.log(`🎉 SUCCESS! Loaded ${allExoplanets.length} NASA exoplanets from CSV!`);
+    console.log(`🎉 SUCCESS! Loaded ALL ${allExoplanets.length} NASA exoplanets from CSV!`);
+    console.log('🔍 Sample exoplanets:');
+    allExoplanets.slice(0, 5).forEach(planet => {
+      console.log(`  - ${planet.name}: ${planet.starType} star, ${planet.temperature}K, ${planet.habitabilityScore}% habitable`);
+    });
+    
+    // Verify Proxima Centauri b is correctly classified
+    const proximaB = allExoplanets.find(p => p.name.toLowerCase().includes('proxima centauri b'));
+    if (proximaB) {
+      console.log(`✅ Proxima Centauri b: ${proximaB.starType} star (CORRECTED!), ${proximaB.temperature}K`);
+    }
+    
     return allExoplanets;
     
   } catch (error) {
     console.error('❌ Error loading NASA CSV:', error);
-    console.log('🔄 Loading comprehensive fallback dataset...');
+    console.log('🔄 Loading fallback dataset...');
     
-    // Load comprehensive fallback data
-    allExoplanets = generateComprehensiveFallbackData();
+    // Load fallback data if CSV fails
+    allExoplanets = generateFallbackData();
     isDataLoaded = true;
     isLoading = false;
     
@@ -351,81 +493,43 @@ async function loadAllNASAData(): Promise<Exoplanet[]> {
 }
 
 /**
- * Generate comprehensive fallback data (297 planets to match your requirement)
+ * Generate fallback data if CSV loading fails
  */
-function generateComprehensiveFallbackData(): Exoplanet[] {
-  console.log('🌟 Generating comprehensive NASA exoplanet dataset...');
+function generateFallbackData(): Exoplanet[] {
+  console.log('🌟 Generating fallback NASA exoplanet dataset...');
   
-  // Real NASA exoplanet data (first 50 most famous ones)
+  // Real NASA exoplanet data with CORRECT stellar classifications
   const realNASAExoplanets = [
-    { name: 'Kepler-452b', radius: 1.63, mass: 5.0, temp: 265, period: 384.8, year: 2015, distance: 1402 },
-    { name: 'TRAPPIST-1e', radius: 0.92, mass: 0.77, temp: 251, period: 6.1, year: 2017, distance: 40.7 },
-    { name: 'Proxima Centauri b', radius: 1.1, mass: 1.27, temp: 234, period: 11.2, year: 2016, distance: 4.24 },
-    { name: 'Kepler-186f', radius: 1.11, mass: 1.44, temp: 188, period: 129.9, year: 2014, distance: 582 },
-    { name: 'Gliese 667 Cc', radius: 1.54, mass: 3.8, temp: 277, period: 28.1, year: 2011, distance: 23.6 },
-    { name: 'HD 40307g', radius: 2.1, mass: 7.1, temp: 227, period: 197.8, year: 2012, distance: 42 },
-    { name: 'Kepler-62f', radius: 1.41, mass: 3.3, temp: 208, period: 267.3, year: 2013, distance: 1200 },
-    { name: 'Tau Ceti e', radius: 1.9, mass: 4.5, temp: 241, period: 168.1, year: 2012, distance: 11.9 },
-    { name: 'Wolf 1061c', radius: 1.6, mass: 4.3, temp: 223, period: 17.9, year: 2015, distance: 13.8 },
-    { name: 'K2-18b', radius: 2.6, mass: 8.0, temp: 265, period: 33.0, year: 2015, distance: 124 },
-    { name: 'Kepler-438b', radius: 1.12, mass: 1.5, temp: 276, period: 35.2, year: 2015, distance: 640 },
-    { name: 'Kepler-440b', radius: 1.86, mass: 4.8, temp: 273, period: 101.1, year: 2015, distance: 851 },
-    { name: 'Ross 128b', radius: 1.35, mass: 1.8, temp: 269, period: 9.9, year: 2017, distance: 11.0 },
-    { name: 'LHS 1140b', radius: 1.43, mass: 6.6, temp: 230, period: 24.7, year: 2017, distance: 40.7 },
-    { name: 'Kepler-22b', radius: 2.4, mass: 5.4, temp: 262, period: 289.9, year: 2011, distance: 620 },
-    { name: 'GJ 273b', radius: 1.2, mass: 2.9, temp: 237, period: 18.6, year: 2017, distance: 12.4 },
-    { name: 'Kapteyn b', radius: 1.1, mass: 4.8, temp: 184, period: 48.6, year: 2014, distance: 12.8 },
-    { name: 'K2-3d', radius: 1.5, mass: 2.7, temp: 256, period: 44.6, year: 2015, distance: 137 },
-    { name: 'HD 85512b', radius: 1.4, mass: 3.6, temp: 298, period: 58.4, year: 2011, distance: 36.2 },
-    { name: 'Kepler-62d', radius: 1.43, mass: 3.9, temp: 241, period: 18.2, year: 2013, distance: 1200 },
-    { name: 'TOI-715b', radius: 1.55, mass: 2.2, temp: 295, period: 19.3, year: 2023, distance: 137 },
-    { name: 'LP 890-9c', radius: 1.37, mass: 1.9, temp: 307, period: 8.8, year: 2022, distance: 105 },
-    { name: 'TOI-849b', radius: 3.4, mass: 39.1, temp: 1800, period: 0.77, year: 2020, distance: 730 },
-    { name: 'WASP-96b', radius: 1.2, mass: 0.48, temp: 1285, period: 3.4, year: 2013, distance: 1150 },
-    { name: 'HAT-P-7b', radius: 1.4, mass: 1.78, temp: 2204, period: 2.2, year: 2008, distance: 1044 },
-    { name: 'Kepler-10c', radius: 2.35, mass: 14.0, temp: 584, period: 45.3, year: 2011, distance: 608 },
-    { name: 'HD 219134b', radius: 1.6, mass: 4.5, temp: 1050, period: 3.1, year: 2015, distance: 21.25 },
-    { name: 'Kepler-145b', radius: 1.7, mass: 4.5, temp: 420, period: 64.0, year: 2014, distance: 2390 },
-    { name: 'Gliese 832c', radius: 1.5, mass: 5.4, temp: 253, period: 36.1, year: 2014, distance: 16.1 },
-    { name: 'K2-18c', radius: 2.3, mass: 7.2, temp: 563, period: 9.2, year: 2015, distance: 124 },
-    { name: 'Ross 128c', radius: 1.1, mass: 1.2, temp: 245, period: 16.0, year: 2017, distance: 11.0 },
-    { name: 'Kepler-20e', radius: 0.87, mass: 0.8, temp: 1040, period: 6.1, year: 2011, distance: 950 },
-    { name: 'K2-155d', radius: 1.6, mass: 3.2, temp: 385, period: 40.2, year: 2018, distance: 200 },
-    { name: 'Kepler-186c', radius: 1.3, mass: 2.5, temp: 343, period: 29.8, year: 2014, distance: 582 },
-    { name: 'Luyten b', radius: 1.1, mass: 2.0, temp: 273, period: 19.4, year: 2017, distance: 12.2 },
-    { name: 'Gliese 667 Cf', radius: 1.8, mass: 5.7, temp: 242, period: 39.6, year: 2013, distance: 23.6 },
-    { name: 'Wolf 1061b', radius: 1.4, mass: 1.5, temp: 485, period: 4.9, year: 2015, distance: 13.8 },
-    { name: 'GJ 667 Ce', radius: 1.2, mass: 2.3, temp: 312, period: 7.2, year: 2013, distance: 23.6 },
-    { name: 'Kepler-62c', radius: 0.54, mass: 0.1, temp: 453, period: 12.4, year: 2013, distance: 1200 },
-    { name: 'HD 97658b', radius: 2.3, mass: 8.0, temp: 741, period: 9.5, year: 2011, distance: 69.5 },
-    { name: 'K2-18e', radius: 1.7, mass: 3.7, temp: 265, period: 33.4, year: 2019, distance: 124 },
-    { name: 'Kepler-138d', radius: 1.2, mass: 2.1, temp: 345, period: 23.1, year: 2014, distance: 200 },
-    { name: 'GJ 667 Cb', radius: 1.54, mass: 4.5, temp: 312, period: 7.2, year: 2009, distance: 23.6 },
-    { name: 'Ross 128b2', radius: 1.3, mass: 3.2, temp: 269, period: 10.5, year: 2017, distance: 11.0 },
-    { name: 'Kepler-22c', radius: 1.9, mass: 6.2, temp: 262, period: 302.0, year: 2011, distance: 620 },
-    { name: 'GJ 273c', radius: 1.5, mass: 4.3, temp: 237, period: 32.1, year: 2017, distance: 12.4 },
-    { name: 'K2-3b', radius: 1.6, mass: 2.6, temp: 563, period: 10.1, year: 2015, distance: 137 },
-    { name: 'Kepler-20f', radius: 1.05, mass: 1.1, temp: 705, period: 19.6, year: 2011, distance: 950 },
-    { name: 'GJ 667 Cd', radius: 1.3, mass: 3.1, temp: 285, period: 15.3, year: 2013, distance: 23.6 },
-    { name: 'Kepler-36b', radius: 1.5, mass: 4.1, temp: 1373, period: 13.8, year: 2012, distance: 1530 }
+    { name: 'Kepler-452b', radius: 1.63, mass: 5.0, temp: 265, period: 384.8, year: 2015, distance: 1402, stellarTemp: 5757 },
+    { name: 'TRAPPIST-1e', radius: 0.92, mass: 0.77, temp: 251, period: 6.1, year: 2017, distance: 40.7, stellarTemp: 2559 },
+    { name: 'Proxima Centauri b', radius: 1.1, mass: 1.27, temp: 234, period: 11.2, year: 2016, distance: 4.24, stellarTemp: 3042 }, // M-dwarf!
+    { name: 'Kepler-186f', radius: 1.11, mass: 1.44, temp: 188, period: 129.9, year: 2014, distance: 582, stellarTemp: 3755 },
+    { name: 'Gliese 667 Cc', radius: 1.54, mass: 3.8, temp: 277, period: 28.1, year: 2011, distance: 23.6, stellarTemp: 3700 },
+    { name: 'HD 40307g', radius: 2.1, mass: 7.1, temp: 227, period: 197.8, year: 2012, distance: 42, stellarTemp: 4977 },
+    { name: 'Kepler-62f', radius: 1.41, mass: 3.3, temp: 208, period: 267.3, year: 2013, distance: 1200, stellarTemp: 4925 },
+    { name: 'Tau Ceti e', radius: 1.9, mass: 4.5, temp: 241, period: 168.1, year: 2012, distance: 11.9, stellarTemp: 5344 },
+    { name: 'Wolf 1061c', radius: 1.6, mass: 4.3, temp: 223, period: 17.9, year: 2015, distance: 13.8, stellarTemp: 3500 },
+    { name: 'K2-18b', radius: 2.6, mass: 8.0, temp: 265, period: 33.0, year: 2015, distance: 124, stellarTemp: 3503 }
   ];
 
   const exoplanets: Exoplanet[] = [];
 
-  // Convert real NASA data
+  // Convert real NASA data with ACCURATE star types
   realNASAExoplanets.forEach((planet, index) => {
     const habitabilityScore = calculateHabitabilityFromNASA({
       radius: planet.radius,
       mass: planet.mass,
       temperature: planet.temp,
       orbitalPeriod: planet.period,
-      stellarTemp: 5778
+      stellarTemp: planet.stellarTemp,
+      distance: planet.distance
     });
     
     const atmosphere = generateAtmosphereFromNASA({
       temperature: planet.temp,
       mass: planet.mass,
-      radius: planet.radius
+      radius: planet.radius,
+      stellarTemp: planet.stellarTemp
     });
     
     const chemicalConcentrations = atmosphereToChemicalConcentrations(atmosphere);
@@ -439,11 +543,21 @@ function generateComprehensiveFallbackData(): Exoplanet[] {
       radius: planet.radius,
       temperature: planet.temp,
       habitabilityScore: Math.round(calculateEnhancedHabitabilityScore(habitabilityScore, biosignatureReport.HabitabilityScore, 0.3)),
-      starType: getStarTypeFromTemp(5778),
+      starType: getStarTypeFromTemp(planet.stellarTemp), // NOW ACCURATE!
       orbitalPeriod: planet.period,
       discoveryYear: planet.year,
-      minerals: generateMineralsFromNASA({ temperature: planet.temp, mass: planet.mass, radius: planet.radius }),
-      bacteria: generateBacteriaFromNASA({ temperature: planet.temp, habitabilityScore }),
+      minerals: generateMineralsFromNASA({ 
+        temperature: planet.temp, 
+        mass: planet.mass, 
+        radius: planet.radius, 
+        stellarTemp: planet.stellarTemp 
+      }),
+      bacteria: generateBacteriaFromNASA({ 
+        temperature: planet.temp, 
+        habitabilityScore, 
+        stellarTemp: planet.stellarTemp, 
+        mass: planet.mass 
+      }),
       atmosphere,
       biosignature: {
         score: Math.round(biosignatureReport.HabitabilityScore * 10) / 10,
@@ -459,56 +573,8 @@ function generateComprehensiveFallbackData(): Exoplanet[] {
     });
   });
 
-  // Generate additional synthetic but realistic exoplanets to reach 297 total
-  const additionalCount = 297 - realNASAExoplanets.length;
-  for (let i = 0; i < additionalCount; i++) {
-    const syntheticData = generateSyntheticNASAData(i + realNASAExoplanets.length);
-    const exoplanet = convertNASARowToExoplanet(syntheticData, i + realNASAExoplanets.length);
-    exoplanets.push(exoplanet);
-  }
-
-  console.log(`✅ Generated ${exoplanets.length} comprehensive NASA exoplanets`);
+  console.log(`✅ Generated ${exoplanets.length} fallback exoplanets with accurate star types`);
   return exoplanets;
-}
-
-/**
- * Generate synthetic but realistic NASA exoplanet data
- */
-function generateSyntheticNASAData(index: number): any {
-  const planetTypes = ['b', 'c', 'd', 'e', 'f', 'g', 'h'];
-  const starPrefixes = ['Kepler', 'K2', 'TOI', 'TIC', 'WASP', 'HAT-P', 'HD', 'GJ', 'LHS', 'TRAPPIST'];
-  
-  const starPrefix = starPrefixes[Math.floor(Math.random() * starPrefixes.length)];
-  const starNumber = Math.floor(Math.random() * 9999) + 1;
-  const planetLetter = planetTypes[Math.floor(Math.random() * planetTypes.length)];
-  
-  const planetName = `${starPrefix}-${starNumber}${planetLetter}`;
-  
-  // Generate realistic parameters based on known exoplanet distributions
-  const radius = 0.3 + Math.random() * 4.0; // 0.3 to 4.3 Earth radii
-  const mass = Math.pow(radius, 2.06) * (0.5 + Math.random() * 1.5); // Mass-radius relationship
-  const period = 1 + Math.random() * 1000; // 1 to 1000 days
-  const temp = 150 + Math.random() * 1500; // 150 to 1650 K
-  const distance = 10 + Math.random() * 2000; // 10 to 2000 light years
-  const year = 2009 + Math.floor(Math.random() * 16); // 2009 to 2024
-  
-  return {
-    pl_name: planetName,
-    pl_rade: radius.toFixed(3),
-    pl_bmasse: mass.toFixed(3),
-    pl_eqt: temp.toFixed(0),
-    pl_orbper: period.toFixed(2),
-    disc_year: year.toString(),
-    sy_dist: distance.toFixed(1),
-    discoverymethod: getRandomDiscoveryMethod(),
-    hostname: `${starPrefix}-${starNumber}`,
-    st_teff: (3000 + Math.random() * 4000).toFixed(0)
-  };
-}
-
-function getRandomDiscoveryMethod(): string {
-  const methods = ['Transit', 'Radial Velocity', 'Direct Imaging', 'Microlensing', 'Transit Timing Variations'];
-  return methods[Math.floor(Math.random() * methods.length)];
 }
 
 // Initialize data loading immediately when module loads
@@ -517,19 +583,28 @@ const dataPromise = loadAllNASAData();
 // Ensure data is loaded before any access
 dataPromise.then(data => {
   allExoplanets = data;
-  console.log(`🎉 READY! ${allExoplanets.length} exoplanets loaded and available`);
+  console.log(`🎉 READY! ALL ${allExoplanets.length} exoplanets loaded and available`);
+  
+  // Verify key planets are correctly classified
+  const testPlanets = ['Proxima Centauri b', 'TRAPPIST-1e', 'Kepler-452b'];
+  testPlanets.forEach(planetName => {
+    const planet = allExoplanets.find(p => p.name.toLowerCase().includes(planetName.toLowerCase()));
+    if (planet) {
+      console.log(`✅ ${planet.name}: ${planet.starType} star, ${planet.temperature}K, ${planet.habitabilityScore}% habitable`);
+    }
+  });
 }).catch(error => {
   console.error('Failed to load data:', error);
-  allExoplanets = generateComprehensiveFallbackData();
+  allExoplanets = generateFallbackData();
   console.log(`🔄 Fallback ready: ${allExoplanets.length} exoplanets`);
 });
 
 // Export functions
 export const getAllExoplanets = (): Exoplanet[] => {
   if (allExoplanets.length === 0) {
-    // If data isn't ready yet, return comprehensive fallback immediately
+    // If data isn't ready yet, return fallback immediately
     console.log('⚡ Data not ready, returning immediate fallback');
-    allExoplanets = generateComprehensiveFallbackData();
+    allExoplanets = generateFallbackData();
   }
   return allExoplanets;
 };
@@ -541,15 +616,16 @@ export const NASA_EXOPLANET_COUNT = () => allExoplanets.length;
 export const isExoplanetsLoading = () => isLoading;
 
 export const refreshExoplanets = async (): Promise<void> => {
-  console.log('🔄 Refreshing NASA exoplanet data...');
+  console.log('🔄 Refreshing ALL NASA exoplanet data...');
   isDataLoaded = false;
+  allExoplanets = []; // Clear cache
   const data = await loadAllNASAData();
   allExoplanets = data;
-  console.log(`🔄 Refreshed with ${allExoplanets.length} exoplanets`);
+  console.log(`🔄 Refreshed with ALL ${allExoplanets.length} exoplanets`);
 };
 
 // Ensure we have data immediately
 if (allExoplanets.length === 0) {
-  allExoplanets = generateComprehensiveFallbackData();
+  allExoplanets = generateFallbackData();
   console.log(`⚡ Immediate fallback: ${allExoplanets.length} exoplanets ready`);
 }

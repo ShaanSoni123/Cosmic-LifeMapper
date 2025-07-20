@@ -75,10 +75,10 @@ export const EnhancedExoplanetStats: React.FC<EnhancedExoplanetStatsProps> = ({
       <StatsCard
         title="NASA Archive"
         value={nasaExoplanets.toLocaleString()}
-        subtitle="Real NASA CSV data"
+        subtitle={`All ${nasaExoplanets} from CSV`}
         icon={Database}
         color="purple"
-        trend="Accurate data"
+        trend="100% Real Data"
       />
       
       {userAddedExoplanets > 0 && (

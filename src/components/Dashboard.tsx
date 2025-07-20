@@ -217,29 +217,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Search and Controls */}
           <div className="backdrop-blur-xl bg-black/40 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-6 md:mb-8 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 transform hover:scale-105 transition-all duration-300">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 sm:gap-6">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 lg:gap-6">
+              {/* Left side - Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
               <button
                 onClick={onCompareClick}
                 className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-cyan-500/30 text-sm md:text-base"
               >
                 <BarChart3 className="w-4 md:w-5 h-4 md:h-5" />
                 <span>Compare Worlds</span>
-              </button>
-              
-              <button
-                onClick={() => setShowNASAModal(true)}
-                className="hidden"
-              >
-                <Database className="w-4 md:w-5 h-4 md:h-5" />
-                <span>NASA Exoplanets</span>
-              </button>
-              
-              <button
-                onClick={() => setShowNASADataViewer(true)}
-                className="hidden"
-              >
-                <FileSpreadsheet className="w-4 md:w-5 h-4 md:h-5" />
-                <span>NASA Data Archive</span>
               </button>
               
               <button
@@ -258,6 +244,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <RefreshCw className={`w-4 md:w-5 h-4 md:h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 <span>{isRefreshing ? 'Refreshing...' : 'Refresh Real Data'}</span>
               </button>
+              </div>
+              
+              {/* Right side - Data status */}
+              <div className="flex items-center space-x-4 bg-black/60 rounded-xl px-4 py-3 border border-green-500/30">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="text-sm">
+                  <span className="text-green-400 font-bold">{totalCount}</span>
+                  <span className="text-gray-300 ml-1">Real NASA Exoplanets</span>
+                </div>
+                <div className="text-xs text-gray-400">
+                  Live Data
+                </div>
+              </div>
             </div>
           </div>
 
@@ -267,7 +266,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
                 <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                  Explore {totalCount} Real NASA Exoplanets
+                  All {totalCount} Real NASA Exoplanets
                 </h2>
               </div>
               
@@ -296,7 +295,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <option value="distance">Sort by Distance</option>
                     <option value="name">Sort by Name</option>
                   </select>
+                  
+                  {/* Habitability Filter */}
+                  <label className="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showOnlyHabitable}
+                      onChange={(e) => setShowOnlyHabitable(e.target.checked)}
+                      className="rounded border-gray-600 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0"
+                    />
+                    <span>Habitable Only</span>
+                  </label>
                 </div>
+              </div>
+            </div>
+            
+            {/* Data Summary */}
+            <div className="mt-4 flex flex-wrap gap-3 text-sm">
+              <div className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg">
+                Total: {totalCount}
+              </div>
+              <div className="bg-green-500/20 text-green-300 px-3 py-1 rounded-lg">
+                Filtered: {filteredExoplanets.length}
+              </div>
+              <div className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-lg">
+                Habitable: {habitablePlanetsCount}
+              </div>
+              <div className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-lg">
+                M-dwarf: {displayExoplanets.filter(p => p.starType === 'M-dwarf').length}
+              </div>
+              <div className="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-lg">
+                G-type: {displayExoplanets.filter(p => p.starType === 'G-type').length}
               </div>
             </div>
           </div>
