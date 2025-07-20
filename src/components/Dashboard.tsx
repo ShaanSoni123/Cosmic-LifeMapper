@@ -36,7 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showNASADataViewer, setShowNASADataViewer] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Use provided exoplanets or get all available exoplanets
   const displayExoplanets = React.useMemo(() => {
@@ -78,7 +78,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleRefreshData = async () => {
     setIsRefreshing(true);
-    setIsLoadingData(true);
     try {
       await refreshExoplanets();
       console.log('✅ Successfully refreshed real NASA CSV data');
@@ -86,52 +85,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       console.error('❌ Failed to refresh NASA CSV data:', error);
     } finally {
       setIsRefreshing(false);
-      setIsLoadingData(false);
     }
   };
-
-  // Check if data is still loading
-  React.useEffect(() => {
-    // Check every 500ms if data is loaded
-    const interval = setInterval(() => {
-      if (displayExoplanets.length > 0) {
-        setIsLoadingData(false);
-        clearInterval(interval);
-        console.log(`✅ Data loaded: ${displayExoplanets.length} exoplanets`);
-      }
-    }, 500);
-
-    // Fallback timeout after 8 seconds
-    const timeout = setTimeout(() => {
-      setIsLoadingData(false);
-      clearInterval(interval);
-      console.log(`⏰ Timeout reached, showing ${displayExoplanets.length} exoplanets`);
-    }, 8000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, [displayExoplanets.length]);
-
-  // Show loading screen while data is loading
-  if (isLoadingData && displayExoplanets.length < 10) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h1 className="text-2xl mb-4">Loading Real NASA Data...</h1>
-          <p className="text-gray-400">Loading 1000+ accurate exoplanets from NASA CSV</p>
-          <p className="text-gray-500 text-sm mt-2">Currently loaded: {displayExoplanets.length} planets</p>
-          <div className="mt-4 flex justify-center space-x-2">
-            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -273,7 +228,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               
               <button
                 onClick={() => setShowNASAModal(true)}
-                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-purple-500/30 text-sm md:text-base"
+                className="hidden"
               >
                 <Database className="w-4 md:w-5 h-4 md:h-5" />
                 <span>NASA Exoplanets</span>
@@ -281,7 +236,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               
               <button
                 onClick={() => setShowNASADataViewer(true)}
-                className="flex items-center justify-center space-x-2 md:space-x-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 px-6 md:px-8 py-3 md:py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-110 shadow-lg shadow-indigo-500/30 text-sm md:text-base"
+                className="hidden"
               >
                 <FileSpreadsheet className="w-4 md:w-5 h-4 md:h-5" />
                 <span>NASA Data Archive</span>
