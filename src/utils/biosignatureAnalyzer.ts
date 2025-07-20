@@ -325,18 +325,26 @@ export function atmosphereToChemicalConcentrations(atmosphere: {
   carbonDioxide: number;
   methane: number;
 }): ChemicalConcentration {
-  // Convert percentages to more realistic concentration ranges for survival analysis
-  const h2Concentration = atmosphere.methane > 1 ? 3.5 + Math.random() * 4 : Math.random() * 2.5;
-  const nh3Concentration = Math.random() * 5; // 0-5 range
-  const c2h6Concentration = atmosphere.methane * 0.3 + Math.random() * 2; // Related to methane
-  const so2Concentration = Math.random() * 3; // 0-3 range
-  const h2sConcentration = Math.random() * 2.5; // 0-2.5 range
+  // Convert percentages to concentration ranges based on atmospheric composition
+  // Scale atmospheric percentages to survival analysis ranges (0-12.5)
+  const h2Concentration = atmosphere.methane > 1 ? 
+    Math.min(12.5, 2.0 + atmosphere.methane * 0.8) : 
+    Math.min(12.5, atmosphere.methane * 1.5);
+  
+  const nh3Concentration = Math.min(12.5, atmosphere.methane * 0.4 + (atmosphere.carbonDioxide > 10 ? 2.0 : 0.5));
+  const c2h6Concentration = Math.min(12.5, atmosphere.methane * 0.6 + 0.5);
+  const so2Concentration = atmosphere.carbonDioxide > 20 ? 
+    Math.min(12.5, 1.5 + Math.random() * 2) : 
+    Math.min(12.5, Math.random() * 1.0);
+  const h2sConcentration = atmosphere.carbonDioxide > 15 ? 
+    Math.min(12.5, 1.0 + Math.random() * 1.5) : 
+    Math.min(12.5, Math.random() * 0.8);
   
   return {
-    O2: Math.min(12.5, atmosphere.oxygen * 0.6), // Scale down to fit survival ranges
-    N2: Math.min(12.5, atmosphere.nitrogen * 0.15), // Scale down to fit survival ranges
-    CO2: Math.min(12.5, atmosphere.carbonDioxide * 1.2), // Scale to fit survival ranges
-    H2: h2Concentration, // Enhanced H₂ calculation
+    O2: Math.min(12.5, atmosphere.oxygen * 0.6),
+    N2: Math.min(12.5, atmosphere.nitrogen * 0.15),
+    CO2: Math.min(12.5, atmosphere.carbonDioxide * 0.8),
+    H2: h2Concentration,
     NH3: nh3Concentration,
     C2H6: c2h6Concentration,
     SO2: so2Concentration,

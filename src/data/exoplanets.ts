@@ -60,24 +60,65 @@ function calculateHabitabilityFromNASA(params: {
   let score = 50; // Base score
 
   // Temperature factor (Earth-like = 288K)
-  const tempDiff = Math.abs(params.temperature - 288);
-  score += Math.max(0, 25 - tempDiff / 15);
+  const earthTemp = 288;
+  const tempDiff = Math.abs(params.temperature - earthTemp);
+  if (tempDiff <= 50) {
+    score += 30; // Perfect temperature range
+  } else if (tempDiff <= 100) {
+    score += 25 - (tempDiff - 50) / 10; // Good temperature range
+  } else if (tempDiff <= 200) {
+    score += 15 - (tempDiff - 100) / 20; // Marginal temperature range
+  } else {
+    score += Math.max(0, 5 - (tempDiff - 200) / 50); // Poor temperature range
+  }
 
   // Size factor (Earth-like = 1.0)
-  const sizeDiff = Math.abs(params.radius - 1.0);
-  score += Math.max(0, 20 - sizeDiff * 12);
+  const radiusDiff = Math.abs(params.radius - 1.0);
+  if (radiusDiff <= 0.5) {
+    score += 20; // Earth-like size
+  } else if (radiusDiff <= 1.0) {
+    score += 15 - (radiusDiff - 0.5) * 10; // Close to Earth size
+  } else if (radiusDiff <= 2.0) {
+    score += 10 - (radiusDiff - 1.0) * 5; // Super-Earth or sub-Earth
+  } else {
+    score += Math.max(0, 2 - (radiusDiff - 2.0) * 2); // Too large or small
+  }
 
   // Mass factor (Earth-like = 1.0)
   const massDiff = Math.abs(params.mass - 1.0);
-  score += Math.max(0, 15 - massDiff * 8);
+  if (massDiff <= 0.5) {
+    score += 15; // Earth-like mass
+  } else if (massDiff <= 2.0) {
+    score += 12 - (massDiff - 0.5) * 4; // Reasonable mass range
+  } else if (massDiff <= 5.0) {
+    score += 6 - (massDiff - 2.0) * 2; // Heavy but possible
+  } else {
+    score += Math.max(0, 1 - (massDiff - 5.0) * 0.5); // Too massive
+  }
 
   // Orbital period factor (Earth-like = 365 days)
-  const periodScore = params.orbitalPeriod > 10 && params.orbitalPeriod < 1000 ? 10 : 5;
-  score += periodScore;
+  if (params.orbitalPeriod >= 200 && params.orbitalPeriod <= 500) {
+    score += 10; // Earth-like orbital period
+  } else if (params.orbitalPeriod >= 50 && params.orbitalPeriod <= 800) {
+    score += 8; // Reasonable orbital period
+  } else if (params.orbitalPeriod >= 10 && params.orbitalPeriod <= 1500) {
+    score += 5; // Marginal orbital period
+  } else {
+    score += 2; // Extreme orbital period
+  }
 
   // Stellar temperature factor (Sun-like = 5778K)
-  const stellarTempDiff = Math.abs(params.stellarTemp - 5778);
-  score += Math.max(0, 10 - stellarTempDiff / 300);
+  const sunTemp = 5778;
+  const stellarTempDiff = Math.abs(params.stellarTemp - sunTemp);
+  if (stellarTempDiff <= 500) {
+    score += 10; // Sun-like star
+  } else if (stellarTempDiff <= 1000) {
+    score += 8 - (stellarTempDiff - 500) / 250; // Similar to Sun
+  } else if (stellarTempDiff <= 2000) {
+    score += 5 - (stellarTempDiff - 1000) / 500; // Different but stable
+  } else {
+    score += Math.max(0, 2 - (stellarTempDiff - 2000) / 1000); // Very different star
+  }
 
   return Math.max(0, Math.min(100, score));
 }
