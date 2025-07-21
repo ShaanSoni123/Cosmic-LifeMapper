@@ -37,14 +37,6 @@ class ErrorBoundary extends React.Component<
             >
               Reload Application
             </button>
-            {this.state.error && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-gray-400 text-sm">Error Details</summary>
-                <pre className="mt-2 text-xs text-gray-500 overflow-auto max-h-32">
-                  {this.state.error.toString()}
-                </pre>
-              </details>
-            )}
           </div>
         </div>
       );
