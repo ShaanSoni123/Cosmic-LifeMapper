@@ -167,7 +167,7 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({
       // Check if planet already exists
       const exists = allExoplanets.some(p => p.name === planet.pl_name);
       if (exists) {
-        console.log(`Planet ${planet.pl_name} already exists`);
+        console.log(`${planet.pl_name} is already in your collection`);
         return;
       }
       
@@ -194,7 +194,7 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({
       };
       
       onPlanetSelect(convertedPlanet);
-      console.log(`Planet ${planet.pl_name} added successfully`);
+      console.log(`${planet.pl_name} has been added to your collection`);
     }
   };
 
