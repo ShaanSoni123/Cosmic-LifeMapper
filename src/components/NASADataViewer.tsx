@@ -167,11 +167,7 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({
       // Check if planet already exists
       const exists = allExoplanets.some(p => p.name === planet.pl_name);
       if (exists) {
-        toast({
-          title: "Planet Already Exists",
-          description: `${planet.pl_name} is already in your collection`,
-          variant: "destructive"
-        });
+        console.log(`Planet ${planet.pl_name} already exists`);
         return;
       }
       
@@ -198,10 +194,7 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({
       };
       
       onPlanetSelect(convertedPlanet);
-      toast({
-        title: "Planet Added Successfully",
-        description: `${planet.pl_name} has been added to your collection`,
-      });
+      console.log(`Planet ${planet.pl_name} added successfully`);
     }
   };
 
@@ -426,6 +419,4 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({
           </div>
         )}
       </div>
-    </div>
-  );
-};
+// Remove toast function - not needed
