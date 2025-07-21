@@ -273,32 +273,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <div>
                 <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                  🔍 Python-Powered Fuzzy Search
+                  🔍 Advanced Fuzzy Search
                 </h3>
                 <p className="text-gray-400 text-sm">
-                  Direct translation of Python rapidfuzz algorithm with 60% match threshold
+                  Intelligent search with typo tolerance and partial matching
                 </p>
               </div>
             </div>
             
             <FuzzySearchBar
               onPlanetSelect={handleAddNASAPlanet}
-              placeholder="Enter planet name (fuzzy matching enabled - try 'kepler', 'trappist', 'proxima')..."
+              placeholder="Search any exoplanet with fuzzy matching (e.g., 'kepler', 'trappist', 'proxima')..."
               className="w-full"
             />
             
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               <div className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-lg">
-                🐍 Python Algorithm
+                ✨ Typo Tolerant
               </div>
               <div className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg">
-                📊 60% Match Threshold
+                🚀 Real-time NASA Data
               </div>
               <div className="bg-pink-500/20 text-pink-300 px-3 py-1 rounded-lg">
-                🔍 RapidFuzz Logic
+                🎯 Smart Matching
               </div>
               <div className="bg-green-500/20 text-green-300 px-3 py-1 rounded-lg">
-                🚀 NASA pscomppars
+                ⚡ Lightning Fast
               </div>
             </div>
           </div>
