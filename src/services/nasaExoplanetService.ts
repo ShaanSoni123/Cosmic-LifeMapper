@@ -306,7 +306,7 @@ class NASAExoplanetService {
         score = Math.min(70, partialScore);
       }
 
-      if (score > 25) { // Lower threshold for more results
+      if (score > 60) { // Higher threshold to match Python rapidfuzz behavior
         matches.push({ name, score: Math.max(0, Math.min(100, Math.round(score))) });
       }
     });
