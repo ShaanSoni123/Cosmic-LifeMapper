@@ -413,12 +413,6 @@ export const NASADataViewer: React.FC<NASADataViewerProps> = ({
 
             {filteredData.length > 50 && (
               <p className="text-gray-400 text-sm text-center mt-4">
-                Showing first 50 results. Use search and filters to narrow down results.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 };
