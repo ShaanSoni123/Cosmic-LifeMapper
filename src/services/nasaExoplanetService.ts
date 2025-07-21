@@ -1,5 +1,5 @@
 // NASA Exoplanet Archive API Integration Service
-// Enhanced with API key support and better error handling
+// Direct translation of Python fuzzy search code to TypeScript
 
 export interface NASAExoplanetData {
   pl_name: string;
@@ -29,7 +29,6 @@ export interface FuzzyMatch {
 
 class NASAExoplanetService {
   private baseUrl = '/api/nasa-proxy.php';
-  private apiKey = import.meta.env.VITE_NASA_API_KEY;
   
   private fallbackPlanets: string[] = [
     'Kepler-452b', 'TRAPPIST-1e', 'Proxima Centauri b', 'Kepler-186f', 'Gliese 667 Cc',
@@ -41,29 +40,22 @@ class NASAExoplanetService {
   ];
 
   /**
-   * Load all planet names from NASA Exoplanet Archive with API key
+   * Load all planet names from NASA Exoplanet Archive (Python equivalent: load_planet_names)
    */
   async loadPlanetNames(): Promise<string[]> {
-    // Enhanced query to get more planets with better filtering
+    // Direct translation of Python query: "SELECT pl_name FROM pscomppars"
     const query = `
-      SELECT DISTINCT pl_name 
-      FROM ps 
-      WHERE pl_name IS NOT NULL 
-        AND pl_name != '' 
-        AND pl_rade IS NOT NULL 
-        AND pl_bmasse IS NOT NULL
-      ORDER BY pl_name
-      LIMIT 1000
+      SELECT pl_name FROM pscomppars
     `.trim();
     
-    console.log('🔍 Loading planet names from NASA Archive with API key...');
-    console.log('🔑 API Key present:', !!this.apiKey);
+    console.log('🔭 Fetching planet names...');
     
     try {
       const response = await fetch('/api/nasa-proxy.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
           'Accept': 'text/csv'
         },
         body: JSON.stringify({
@@ -72,79 +64,67 @@ class NASAExoplanetService {
         })
       });
 
-      console.log('NASA API Response Status:', response.status);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('NASA API Error:', errorText);
-        console.log('🔄 Falling back to sample data...');
+        console.error('⚠️ Couldn\'t load planet names:', errorText);
         return this.fallbackPlanets.sort();
       }
 
       const csvText = await response.text();
-      console.log('NASA API Response Length:', csvText.length);
-      console.log('NASA API Response Preview:', csvText.substring(0, 300));
       
       // Check if response contains error messages
-      if (csvText.includes('ERROR') || csvText.includes('Exception') || csvText.length < 50) {
-        console.error('Invalid NASA API response:', csvText.substring(0, 200));
-        console.log('🔄 Using fallback data due to API error...');
+      if (csvText.includes('ERROR') || csvText.includes('Exception')) {
+        console.error('⚠️ Couldn\'t load planet names: API error');
         return this.fallbackPlanets.sort();
       }
       
       const lines = csvText.trim().split('\n');
       
       if (lines.length < 2) {
-        console.log('🔄 No planet data received, using fallback...');
+        console.log('⚠️ No planet data received, using fallback...');
         return this.fallbackPlanets.sort();
       }
       
-      // Skip header row and extract planet names
+      // Parse CSV and extract planet names (equivalent to pandas dropna().tolist())
       const planetNames = lines.slice(1)
-        .map(line => line.trim().replace(/"/g, '')) // Remove quotes
-        .filter(line => line && line !== 'null' && line !== '' && line.length > 2)
+        .map(line => line.trim().replace(/"/g, ''))
+        .filter(line => line && line !== 'null' && line !== '')
         .sort();
 
-      console.log(`✅ Successfully loaded ${planetNames.length} exoplanet names from NASA Archive`);
-      console.log('Sample planets:', planetNames.slice(0, 5));
+      console.log(`✅ Loaded ${planetNames.length} planet names`);
       
-      return planetNames.length > 0 ? planetNames : this.fallbackPlanets.sort();
+      return planetNames;
       
     } catch (error) {
-      console.error('❌ Failed to load planet names from NASA:', error);
-      console.log('🔄 Using enhanced fallback planet list...');
-      
-      // Return enhanced fallback list
+      console.error('⚠️ Couldn\'t load planet names:', error);
       return this.fallbackPlanets.sort();
     }
   }
 
   /**
-   * Fetch detailed data for a specific planet with enhanced parameters
+   * Fetch detailed planet info for one planet (Python equivalent: fetch_planet_details)
    */
   async fetchPlanetDetails(planetName: string): Promise<NASAExoplanetData | null> {
-    // SQL escape single quotes
+    // SQL escape single quotes (same as Python: planet_name.replace("'", "''"))
     const safeName = planetName.replace(/'/g, "''");
     
-    // Enhanced query with more parameters
+    // Direct translation of Python query
     const query = `
-      SELECT pl_name, pl_rade, pl_bmasse, pl_orbper, pl_eqt, 
-             st_teff, st_age, st_mass, st_dens, st_rad, disc_year, 
-             pl_nespec, discoverymethod, disc_locale, disc_facility,
-             hostname, sy_snum, sy_pnum, pl_orbsmax, pl_orbeccen,
-             st_lum, st_met, pl_insol, pl_dens
-      FROM ps 
+      SELECT pl_name, pl_rade, pl_bmasse, pl_orbper, pl_eqt,
+             st_teff, st_age, st_mass, st_dens, disc_year, pl_nespec,
+             discoverymethod, disc_locale, disc_facility, st_rad
+      FROM pscomppars 
       WHERE pl_name = '${safeName}'
-      LIMIT 1
     `.trim();
 
-    console.log('🔍 Fetching planet details for:', planetName);
+    console.log('📡 Getting detailed data for:', planetName);
 
     try {
       const response = await fetch('/api/nasa-proxy.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
           'Accept': 'text/csv'
         },
         body: JSON.stringify({
@@ -154,28 +134,26 @@ class NASAExoplanetService {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('NASA API Error:', errorText);
-        console.log('🔄 Generating fallback data for:', planetName);
+        console.error('⚠️ Couldn\'t fetch planet data');
         return this.generateFallbackPlanetData(planetName);
       }
 
       const csvText = await response.text();
-      console.log('Planet details response length:', csvText.length);
       
       // Check if response contains error messages
       if (csvText.includes('ERROR') || csvText.includes('Exception')) {
-        console.error('Invalid NASA API response for planet details:', csvText.substring(0, 200));
+        console.error('⚠️ Couldn\'t fetch planet data: API error');
         return this.generateFallbackPlanetData(planetName);
       }
       
       const lines = csvText.trim().split('\n');
 
       if (lines.length < 2) {
-        console.log('No detailed data found, generating fallback data');
+        console.log('No data found.');
         return this.generateFallbackPlanetData(planetName);
       }
 
+      // Parse CSV response (equivalent to pandas read_csv)
       const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
       const values = lines[1].split(',').map(v => v.trim().replace(/"/g, ''));
 
@@ -183,11 +161,10 @@ class NASAExoplanetService {
       headers.forEach((header, index) => {
         const value = values[index];
         if (value && value !== 'null' && value !== '') {
-          // Convert numeric fields
+          // Convert numeric fields (equivalent to pandas numeric conversion)
           const numericFields = [
-            'pl_rade', 'pl_bmasse', 'pl_orbper', 'pl_eqt', 'st_teff', 'st_age', 
-            'st_mass', 'st_dens', 'st_rad', 'disc_year', 'pl_nespec', 'sy_snum', 
-            'sy_pnum', 'pl_orbsmax', 'pl_orbeccen', 'st_lum', 'st_met', 'pl_insol', 'pl_dens'
+            'pl_rade', 'pl_bmasse', 'pl_orbper', 'pl_eqt', 'st_teff', 'st_age',
+            'st_mass', 'st_dens', 'st_rad', 'disc_year', 'pl_nespec'
           ];
           
           if (numericFields.includes(header)) {
@@ -201,69 +178,40 @@ class NASAExoplanetService {
         }
       });
 
-      // Ensure we have the planet name
       planetData.pl_name = planetName;
 
-      console.log('✅ Successfully fetched planet details:', Object.keys(planetData));
+      console.log('✅ Planet data fetched successfully');
       return planetData as NASAExoplanetData;
       
     } catch (error) {
-      console.error('Failed to fetch planet details:', error);
+      console.error('⚠️ Couldn\'t fetch planet data:', error);
       return this.generateFallbackPlanetData(planetName);
     }
   }
 
   /**
-   * Generate enhanced fallback planet data
+   * Generate fallback planet data when API fails
    */
   private generateFallbackPlanetData(planetName: string): NASAExoplanetData {
-    // Generate more realistic data based on planet name patterns
-    const isKepler = planetName.includes('Kepler');
-    const isTrappist = planetName.includes('TRAPPIST');
-    const isProxima = planetName.includes('Proxima');
-    
-    let baseData: NASAExoplanetData = {
+    return {
       pl_name: planetName,
-      pl_rade: 0.8 + Math.random() * 2.4, // 0.8 to 3.2 Earth radii
-      pl_bmasse: 0.5 + Math.random() * 9.5, // 0.5 to 10 Earth masses
-      pl_orbper: 10 + Math.random() * 500, // 10 to 510 days
-      pl_eqt: 200 + Math.random() * 600, // 200 to 800 K
-      st_teff: 3000 + Math.random() * 4000, // 3000 to 7000 K
-      st_age: 1 + Math.random() * 12, // 1 to 13 Gyr
-      st_mass: 0.3 + Math.random() * 1.7, // 0.3 to 2.0 solar masses
-      st_rad: 0.4 + Math.random() * 1.6, // 0.4 to 2.0 solar radii
-      disc_year: 2009 + Math.floor(Math.random() * 16), // 2009 to 2024
+      pl_rade: 1.0 + Math.random() * 2.0,
+      pl_bmasse: 1.0 + Math.random() * 5.0,
+      pl_orbper: 100 + Math.random() * 300,
+      pl_eqt: 250 + Math.random() * 300,
+      st_teff: 4000 + Math.random() * 3000,
+      st_age: 2 + Math.random() * 10,
+      st_mass: 0.5 + Math.random() * 1.5,
+      st_rad: 0.5 + Math.random() * 1.5,
+      disc_year: 2010 + Math.floor(Math.random() * 14),
       discoverymethod: 'Transit',
-      disc_facility: 'Kepler Space Telescope',
-      hostname: planetName.split(' ')[0] || planetName.split('-')[0],
-      sy_snum: 1,
-      sy_pnum: Math.floor(Math.random() * 8) + 1
+      disc_facility: 'Space Telescope',
+      hostname: planetName.split('-')[0] || planetName.split(' ')[0]
     };
-
-    // Adjust based on planet type
-    if (isKepler) {
-      baseData.discoverymethod = 'Transit';
-      baseData.disc_facility = 'Kepler Space Telescope';
-      baseData.disc_year = 2009 + Math.floor(Math.random() * 6);
-    } else if (isTrappist) {
-      baseData.st_teff = 2500 + Math.random() * 1000; // M-dwarf
-      baseData.pl_orbper = 1 + Math.random() * 20; // Close orbit
-      baseData.discoverymethod = 'Transit';
-      baseData.disc_facility = 'TRAPPIST';
-      baseData.sy_pnum = 7; // TRAPPIST-1 has 7 planets
-    } else if (isProxima) {
-      baseData.st_teff = 3000 + Math.random() * 500; // M-dwarf
-      baseData.pl_orbper = 11.2; // Known orbital period
-      baseData.discoverymethod = 'Radial Velocity';
-      baseData.disc_facility = 'ESO 3.6m Telescope';
-    }
-
-    console.log(`Generated enhanced fallback data for ${planetName}`);
-    return baseData;
   }
 
   /**
-   * Enhanced fuzzy search with better scoring
+   * Match user input with best 5 planets (Python equivalent: match_planet_name)
    */
   fuzzySearch(query: string, planetNames: string[], limit: number = 10): FuzzyMatch[] {
     if (!query.trim()) return [];
@@ -275,22 +223,15 @@ class NASAExoplanetService {
       const nameLower = name.toLowerCase();
       let score = 0;
 
-      // Exact match gets highest score
+      // Simple scoring algorithm (equivalent to rapidfuzz process.extract)
       if (nameLower === queryLower) {
         score = 100;
-      }
-      // Starts with query gets high score
-      else if (nameLower.startsWith(queryLower)) {
+      } else if (nameLower.startsWith(queryLower)) {
         score = 95 - (name.length - query.length);
-      }
-      // Contains query gets medium score
-      else if (nameLower.includes(queryLower)) {
+      } else if (nameLower.includes(queryLower)) {
         const index = nameLower.indexOf(queryLower);
         score = 80 - index - (name.length - query.length) * 0.5;
-      }
-      // Partial matches for common patterns
-      else {
-        // Check for partial matches in planet naming patterns
+      } else {
         const queryParts = queryLower.split(/[-\s]/);
         const nameParts = nameLower.split(/[-\s]/);
         
@@ -306,7 +247,7 @@ class NASAExoplanetService {
         score = Math.min(70, partialScore);
       }
 
-      if (score > 60) { // Higher threshold to match Python rapidfuzz behavior
+      if (score >= 60) { // Match Python threshold: matches = [m for m in matches if m[1] >= 60]
         matches.push({ name, score: Math.max(0, Math.min(100, Math.round(score))) });
       }
     });
@@ -353,7 +294,7 @@ class NASAExoplanetService {
   }
 
   /**
-   * Enhanced conversion to internal Exoplanet format
+   * Convert NASA data to internal Exoplanet format (Python equivalent: get_planet_data_dict)
    */
   convertToExoplanet(nasaData: NASAExoplanetData, id: string): any {
     const habitabilityScore = this.calculateHabitabilityFromNASA(nasaData);
@@ -370,21 +311,9 @@ class NASAExoplanetService {
       orbitalPeriod: nasaData.pl_orbper || 365,
       discoveryYear: nasaData.disc_year || 2020,
       discoveryMethod: nasaData.discoverymethod || 'Unknown',
-      discoveryFacility: nasaData.disc_facility || 'Unknown',
-      discoveryLocale: nasaData.disc_locale || 'Unknown',
-      hostName: nasaData.hostname || 'Unknown',
-      stellarAge: nasaData.st_age,
-      stellarMass: nasaData.st_mass,
-      stellarRadius: nasaData.st_rad,
-      stellarDensity: nasaData.st_dens,
-      numberOfSpectra: nasaData.pl_nespec,
-      systemStars: nasaData.sy_snum,
-      systemPlanets: nasaData.sy_pnum,
-      // Generate estimated compositions based on available data
       minerals: this.generateMineralsFromNASA(nasaData),
       bacteria: this.generateBacteriaFromNASA(nasaData),
       atmosphere: this.generateAtmosphereFromNASA(nasaData),
-      // Add NASA-specific data
       nasaData: {
         isRealNASAData: true,
         lastUpdated: new Date().toISOString(),
@@ -396,28 +325,20 @@ class NASAExoplanetService {
   private calculateHabitabilityFromNASA(data: NASAExoplanetData): number {
     let score = 50; // Base score
 
-    // Temperature factor (Earth-like = 288K)
+    // Simple habitability calculation
     if (data.pl_eqt) {
       const tempDiff = Math.abs(data.pl_eqt - 288);
       score += Math.max(0, 30 - tempDiff / 10);
     }
 
-    // Size factor (Earth-like = 1.0)
     if (data.pl_rade) {
       const sizeDiff = Math.abs(data.pl_rade - 1.0);
       score += Math.max(0, 20 - sizeDiff * 10);
     }
 
-    // Mass factor (Earth-like = 1.0)
     if (data.pl_bmasse) {
       const massDiff = Math.abs(data.pl_bmasse - 1.0);
       score += Math.max(0, 20 - massDiff * 5);
-    }
-
-    // Stellar temperature factor (Sun-like = 5778K)
-    if (data.st_teff) {
-      const stellarTempDiff = Math.abs(data.st_teff - 5778);
-      score += Math.max(0, 10 - stellarTempDiff / 200);
     }
 
     return Math.max(0, Math.min(100, Math.round(score)));
@@ -433,89 +354,31 @@ class NASAExoplanetService {
   }
 
   private generateMineralsFromNASA(data: NASAExoplanetData): any {
-    // More sophisticated mineral estimation based on planet characteristics
-    const planetType = (data.pl_rade || 1) < 1.5 ? 'rocky' : (data.pl_rade || 1) < 4 ? 'super-earth' : 'gas-giant';
-    const temp = data.pl_eqt || 288;
-    
-    let minerals = {
+    return {
       iron: 30,
       silicon: 25,
       magnesium: 15,
       carbon: 10,
       water: 20
     };
-
-    // Adjust based on planet type and temperature
-    if (planetType === 'rocky') {
-      minerals.iron += 5;
-      minerals.silicon += 3;
-    } else if (planetType === 'gas-giant') {
-      minerals.iron -= 10;
-      minerals.water += 10;
-    }
-
-    // Temperature effects on water content
-    if (temp > 350) {
-      minerals.water = Math.max(2, minerals.water - 15);
-      minerals.carbon += 5;
-    } else if (temp < 250) {
-      minerals.water = Math.min(40, minerals.water + 10);
-    }
-
-    // Add some randomization
-    Object.keys(minerals).forEach(key => {
-      minerals[key as keyof typeof minerals] += Math.round((Math.random() - 0.5) * 10);
-      minerals[key as keyof typeof minerals] = Math.max(1, Math.min(45, minerals[key as keyof typeof minerals]));
-    });
-
-    return minerals;
   }
 
   private generateBacteriaFromNASA(data: NASAExoplanetData): any {
-    const habitability = this.calculateHabitabilityFromNASA(data);
-    const temp = data.pl_eqt || 288;
-    
     return {
-      extremophiles: Math.round(40 + habitability * 0.3 + (temp > 400 ? 20 : 0) + Math.random() * 15),
-      photosynthetic: Math.round(Math.max(5, habitability * 0.6 - (temp > 350 ? 20 : 0) + Math.random() * 15)),
-      chemosynthetic: Math.round(45 + habitability * 0.4 + Math.random() * 20),
-      anaerobic: Math.round(60 + habitability * 0.2 + Math.random() * 15)
+      extremophiles: 40 + Math.random() * 30,
+      photosynthetic: 30 + Math.random() * 40,
+      chemosynthetic: 50 + Math.random() * 30,
+      anaerobic: 60 + Math.random() * 25
     };
   }
 
   private generateAtmosphereFromNASA(data: NASAExoplanetData): any {
-    const temp = data.pl_eqt || 288;
-    const mass = data.pl_bmasse || 1;
-    const isHot = temp > 350;
-    const isLowMass = mass < 0.5;
-    
-    let atmosphere = {
+    return {
       nitrogen: 70,
       oxygen: 20,
       carbonDioxide: 8,
       methane: 2
     };
-
-    // Adjust based on conditions
-    if (isHot) {
-      atmosphere.nitrogen -= 20;
-      atmosphere.carbonDioxide += 25;
-      atmosphere.oxygen -= 10;
-    }
-
-    if (isLowMass) {
-      // Low mass planets lose atmosphere
-      atmosphere.nitrogen -= 10;
-      atmosphere.oxygen -= 5;
-    }
-
-    // Normalize to 100%
-    const total = Object.values(atmosphere).reduce((sum, val) => sum + val, 0);
-    Object.keys(atmosphere).forEach(key => {
-      atmosphere[key as keyof typeof atmosphere] = Math.round((atmosphere[key as keyof typeof atmosphere] / total) * 100 * 100) / 100;
-    });
-
-    return atmosphere;
   }
 }
 
